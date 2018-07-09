@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<ruleset name="ImportDetection">
+ <description>A set of phpcs sniffs to look for unused or unimported symbols.</description>
+</ruleset>

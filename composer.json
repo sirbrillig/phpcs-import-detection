@@ -1,0 +1,25 @@
+{
+    "name": "sirbrillig/phpcs-import-detection",
+    "description": "A set of phpcs sniffs to look for unused or unimported symbols.",
+    "type": "phpcodesniffer-standard",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Payton Swick",
+            "email": "payton@foolord.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "test": "./vendor/bin/phpunit"
+    },
+    "require": {},
+    "require-dev": {
+        "sirbrillig/phpcs-variable-analysis": "^2.0.1",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4",
+        "phpunit/phpunit": "^6.4",
+        "limedeck/phpunit-detailed-printer": "^3.1",
+        "squizlabs/php_codesniffer": "3.3.0"
+    }
+}
