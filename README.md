@@ -67,4 +67,4 @@ vendor/bin/phpcs -s src/MyProject/MyClass.php
 
 ## See Also
 
-- [VariableAnalysis](https://github.com/sirbrillig/phpcs-variable-analysis)
+- [VariableAnalysis](https://github.com/sirbrillig/phpcs-variable-analysis): Find undefined and unused variables.
