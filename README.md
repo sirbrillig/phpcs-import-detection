@@ -64,3 +64,7 @@ Most editors have a phpcs plugin available, but you can also run phpcs manually.
 ```
 vendor/bin/phpcs -s src/MyProject/MyClass.php
 ```
+
+## See Also
+
+- [VariableAnalysis](https://github.com/sirbrillig/phpcs-variable-analysis)
