@@ -19,6 +19,7 @@ class Car {
   public function drive() {
     startCar(); // this is fine because `startCar` is imported
     Registry\registerCar($this); // this is fine because `Registry` is imported
+    \DrivingTracker\registerDrive($this); // this is fine because it's fully-qualified
     goFaster(); // this will be a warning because `goFaster` was not imported
   }
 }
@@ -47,14 +48,23 @@ When installing sniff standards in a project, you edit a `phpcs.xml` file with t
 
 ## Ignoring Symbols
 
-You can ignore certain patterns by using the `ignoreUnimportedSymbols` config option. It is a regular expression. Here is an example:
+Oftentimes there might be global symbols that you want to use without importing or using a fully-qualified path.
+
+(Remember that function call resolution first searches the current namespace, then the global namespace, but constant and class resolution only searches the current namespace! You still have to import things like `Exception` or use the fully-qualified `\Exception`.)
+
+You can ignore certain patterns by using the `ignoreUnimportedSymbols` config option. It is a regular expression. Here is an example for some common WordPress symbols:
 
 ```xml
-	<rule ref="ImportDetection.Imports.RequireImports">
-		<properties>
-			<property name="ignoreUnimportedSymbols" value="/^(wp_parse_args|OBJECT\S*|ARRAY_\S+|is_wp_error|__|esc_html__|get_blog_\S+)$/"/>
-		</properties>
-	</rule>
+<?xml version="1.0"?>
+<ruleset name="MyStandard">
+ <description>My library.</description>
+ <rule ref="ImportDetection"/>
+ <rule ref="ImportDetection.Imports.RequireImports">
+   <properties>
+    <property name="ignoreUnimportedSymbols" value="/^(wp_parse_args|OBJECT\S*|ARRAY_\S+|is_wp_error|__|esc_html__|get_blog_\S+)$/"/>
+  </properties>
+ </rule>
+</ruleset>
 ```
 
 ## Usage
