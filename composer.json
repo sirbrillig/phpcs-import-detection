@@ -9,6 +9,11 @@
             "email": "payton@foolord.com"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "ImportDetection\\": "ImportDetection/"
+        }
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
