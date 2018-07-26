@@ -96,7 +96,7 @@ class RequireImportsSniffTest extends TestCase {
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
 		$phpcsFile->process();
 		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
-		$expectedLines = [];
+		$expectedLines = [10];
 		$this->assertEquals($expectedLines, $lines);
 	}
 }
