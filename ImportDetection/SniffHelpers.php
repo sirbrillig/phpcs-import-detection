@@ -62,6 +62,9 @@ class SniffHelpers {
 
 	public function getImportType(File $phpcsFile, $stackPtr): string {
 		$tokens = $phpcsFile->getTokens();
+		if (! empty($tokens[$stackPtr]['conditions'])) {
+			return 'trait-application';
+		}
 		$nextStringPtr = $phpcsFile->findNext([T_STRING], $stackPtr + 1);
 		if (! $nextStringPtr) {
 			return 'unknown';
@@ -154,7 +157,11 @@ class SniffHelpers {
 		return !! $phpcsFile->findPrevious([T_NAMESPACE], $stackPtr - 1, $previousStatementPtr);
 	}
 
-	public function isWithinUseStatement(File $phpcsFile, $stackPtr): bool {
+	public function isWithinImportStatement(File $phpcsFile, $stackPtr): bool {
+		$tokens = $phpcsFile->getTokens();
+		if (! empty($tokens[$stackPtr]['conditions'])) {
+			return false;
+		}
 		$isClosureImport = $phpcsFile->findNext([T_OPEN_PARENTHESIS], $stackPtr + 1, $stackPtr + 5);
 		if ($isClosureImport) {
 			return false;
@@ -192,7 +199,7 @@ class SniffHelpers {
 
 	public function isSymbolADefinition(File $phpcsFile, Symbol $symbol): bool {
 		// if the previous non-whitespace token is const, function, class, or trait, it is a definition
-		// Note: this does not handle use statements, for that use isWithinUseStatement
+		// Note: this does not handle use statements, for that use isWithinImportStatement
 		$stackPtr = $symbol->getSymbolPosition();
 		$prevToken = $this->getPreviousNonWhitespaceToken($phpcsFile, $stackPtr) ?? [];
 		return $this->isTokenADefinition($prevToken) || $this->isWithinDefineCall($phpcsFile, $stackPtr) || $this->isWithinDeclareCall($phpcsFile, $stackPtr);
