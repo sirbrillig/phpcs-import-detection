@@ -93,6 +93,9 @@ class RequireImportsSniff implements Sniff {
 	}
 
 	private function debug(string $message) {
+		if (! defined('PHP_CODESNIFFER_VERBOSITY')) {
+			return;
+		}
 		if (PHP_CODESNIFFER_VERBOSITY > 3) {
 			echo PHP_EOL . "RequireImportsSniff: DEBUG: $message" . PHP_EOL;
 		}
