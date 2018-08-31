@@ -99,4 +99,18 @@ class RequireImportsSniffTest extends TestCase {
 		$expectedLines = [10];
 		$this->assertEquals($expectedLines, $lines);
 	}
+
+	public function testRequireImportsDoesNotBleedToMultipleFiles() {
+		$fixtureFile = __DIR__ . '/MultipleFilesFixtures';
+		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
+		$helper = new SniffTestHelper();
+		$phpcsFiles = $helper->prepareLocalFilesForSniffs($sniffFile, $fixtureFile);
+		$helper->processFiles($phpcsFiles);
+		$linesByFile = $helper->getNoticesFromFiles($phpcsFiles, 'warning');
+		$expectedLines = [
+			__DIR__ . '/MultipleFilesFixtures/MultipleFilesFixtures1.php' => [5],
+			__DIR__ . '/MultipleFilesFixtures/MultipleFilesFixtures2.php' => [9],
+		];
+		$this->assertEquals($expectedLines, $linesByFile);
+	}
 }
