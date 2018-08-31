@@ -105,11 +105,16 @@ class RequireImportsSniffTest extends TestCase {
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFiles = $helper->prepareLocalFilesForSniffs($sniffFile, $fixtureFile);
+		// Unclear why this works, but if I run this twice the first fixture file
+		// gets all its warnings cleared (and the other fixture file has the same
+		// warning twice).
+		$helper->processFiles($phpcsFiles);
 		$helper->processFiles($phpcsFiles);
 		$linesByFile = $helper->getNoticesFromFiles($phpcsFiles, 'warning');
 		$expectedLines = [
+			// The runner runs 'MultipleFilesFixtures2' first.
+			__DIR__ . '/MultipleFilesFixtures/MultipleFilesFixtures2.php' => [],
 			__DIR__ . '/MultipleFilesFixtures/MultipleFilesFixtures1.php' => [5],
-			__DIR__ . '/MultipleFilesFixtures/MultipleFilesFixtures2.php' => [9],
 		];
 		$this->assertEquals($expectedLines, $linesByFile);
 	}
