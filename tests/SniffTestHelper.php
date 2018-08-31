@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ImportDetectionTest;
 
 use PHP_CodeSniffer\Files\LocalFile;
+use PHP_CodeSniffer\Files\FileList;
 use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Config;
 
@@ -22,10 +23,51 @@ class SniffTestHelper {
 		return new LocalFile($fixtureFile, $ruleset, $config);
 	}
 
+	public function prepareLocalFilesForSniffs($sniffFiles, $fixtureFiles): FileList {
+		$config = new Config();
+		if (! is_array($fixtureFiles)) {
+			$fixtureFiles = [$fixtureFiles];
+		}
+		$config->files = $fixtureFiles;
+		$ruleset = new Ruleset($config);
+		if (! is_array($sniffFiles)) {
+			$sniffFiles = [$sniffFiles];
+		}
+		$ruleset->registerSniffs($sniffFiles, [], []);
+		$ruleset->populateTokenListeners();
+		return new FileList($config, $ruleset);
+	}
+
+	public function processFiles($sniffFiles) {
+		foreach ($sniffFiles as $phpcsFile) {
+			if (! file_exists($phpcsFile->path)) {
+				throw new \Exception('Fixture file does not exist! ' . $phpcsFile->path);
+			}
+			$phpcsFile->process();
+		}
+	}
+
 	public function getLineNumbersFromMessages(array $messages): array {
 		$lines = array_keys($messages);
 		sort($lines);
 		return $lines;
+	}
+
+	public function getNoticesFromFiles($phpcsFiles, string $noticeType): array {
+		$noticesByFile = [];
+		foreach ($phpcsFiles as $phpcsFile) {
+			switch ($noticeType) {
+				case 'warning':
+					$noticesByFile[$phpcsFile->path] = $this->getLineNumbersFromMessages($phpcsFile->getWarnings());
+					break;
+				case 'error':
+					$noticesByFile[$phpcsFile->path] = $this->getLineNumbersFromMessages($phpcsFile->getErrors());
+					break;
+				default:
+					throw new \Exception("Invalid notice type '{$noticeType}'");
+			}
+		}
+		return $noticesByFile;
 	}
 
 	public function getWarningLineNumbersFromFile(LocalFile $phpcsFile): array {
