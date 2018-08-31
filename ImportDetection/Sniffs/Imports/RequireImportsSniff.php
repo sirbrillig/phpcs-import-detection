@@ -5,17 +5,14 @@ namespace ImportDetection\Sniffs\Imports;
 use ImportDetection\Symbol;
 use ImportDetection\ImportedSymbol;
 use ImportDetection\SniffHelpers;
+use ImportDetection\FileSymbolRecord;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 
 class RequireImportsSniff implements Sniff {
 	public $ignoreUnimportedSymbols = null;
 
-	private $importedFunctions = [];
-	private $importedConsts = [];
-	private $importedClasses = [];
-	private $importedSymbolRecords = [];
-	private $seenSymbols = [];
+	private $symbolRecordsByFile = [];
 
 	public function register() {
 		return [T_USE, T_STRING, T_RETURN_TYPE, T_WHITESPACE];
@@ -25,6 +22,7 @@ class RequireImportsSniff implements Sniff {
 		$helper = new SniffHelpers();
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
+		$this->symbolRecordsByFile[$phpcsFile->path] = $this->symbolRecordsByFile[$phpcsFile->path] ?? new FileSymbolRecord;
 		if ($token['type'] === 'T_WHITESPACE') {
 			$this->debug('found whitespace');
 			return $this->processEndOfFile($phpcsFile, $stackPtr);
@@ -35,15 +33,15 @@ class RequireImportsSniff implements Sniff {
 		}
 		$symbol = $helper->getFullSymbol($phpcsFile, $stackPtr);
 		// If the symbol has been seen before (if this is a duplicate), ignore it
-		if (in_array($symbol, $this->seenSymbols)) {
+		if (in_array($symbol, $this->symbolRecordsByFile[$phpcsFile->path]->seenSymbols)) {
 			$this->debug('found duplicate symbol ' . $symbol->getName());
 			return;
 		}
-		$this->seenSymbols[] = $symbol;
+		$this->symbolRecordsByFile[$phpcsFile->path]->seenSymbols[] = $symbol;
 		// If the symbol is in the ignore list, ignore it
 		if ($this->isSymbolIgnored($symbol)) {
 			$this->debug('found ignored symbol ' . $symbol->getName());
-			$this->markSymbolUsed($symbol);
+			$this->markSymbolUsed($phpcsFile, $symbol);
 			return;
 		}
 		// If the symbol is a fully-qualified namespace, ignore it
@@ -85,7 +83,7 @@ class RequireImportsSniff implements Sniff {
 		// If the symbol has no namespace and is itself is imported or defined, ignore it
 		if ($this->isSymbolDefined($phpcsFile, $symbol)) {
 			$this->debug('found defined symbol ' . $symbol->getName());
-			$this->markSymbolUsed($symbol);
+			$this->markSymbolUsed($phpcsFile, $symbol);
 			return;
 		}
 		$error = "Found unimported symbol '{$symbol->getName()}'.";
@@ -130,11 +128,11 @@ class RequireImportsSniff implements Sniff {
 
 	private function isNamespaceImportedOrDefined(File $phpcsFile, string $namespace): bool {
 		return (
-			$this->isClassImported($namespace)
+			$this->isClassImported($phpcsFile, $namespace)
 			|| $this->isClassDefined($phpcsFile, $namespace)
-			|| $this->isFunctionImported($namespace)
+			|| $this->isFunctionImported($phpcsFile, $namespace)
 			|| $this->isFunctionDefined($phpcsFile, $namespace)
-			|| $this->isConstImported($namespace)
+			|| $this->isConstImported($phpcsFile, $namespace)
 			|| $this->isConstDefined($phpcsFile, $namespace)
 		);
 	}
@@ -152,43 +150,43 @@ class RequireImportsSniff implements Sniff {
 		}
 	}
 
-	private function recordImportedSymbols(int $stackPtr, array $importNames) {
+	private function recordImportedSymbols(File $phpcsFile, int $stackPtr, array $importNames) {
 		foreach ($importNames as $symbol) {
-			$this->importedSymbolRecords[] = new ImportedSymbol($stackPtr, $symbol);
+			$this->symbolRecordsByFile[$phpcsFile->path]->importedSymbolRecords[] = new ImportedSymbol($stackPtr, $symbol);
 		}
 	}
 
 	private function saveFunctionImport(File $phpcsFile, $stackPtr) {
 		$helper = new SniffHelpers();
 		$importNames = $helper->getImportNames($phpcsFile, $stackPtr);
-		$this->recordImportedSymbols($stackPtr, $importNames);
-		$this->importedFunctions = array_merge($this->importedFunctions, $importNames);
+		$this->recordImportedSymbols($phpcsFile, $stackPtr, $importNames);
+		$this->symbolRecordsByFile[$phpcsFile->path]->addImportedFunctions($importNames);
 	}
 
 	private function saveConstImport(File $phpcsFile, $stackPtr) {
 		$helper = new SniffHelpers();
 		$importNames = $helper->getImportNames($phpcsFile, $stackPtr);
-		$this->recordImportedSymbols($stackPtr, $importNames);
-		$this->importedConsts = array_merge($this->importedConsts, $importNames);
+		$this->recordImportedSymbols($phpcsFile, $stackPtr, $importNames);
+		$this->symbolRecordsByFile[$phpcsFile->path]->addImportedConsts($importNames);
 	}
 
 	private function saveClassImport(File $phpcsFile, $stackPtr) {
 		$helper = new SniffHelpers();
 		$importNames = $helper->getImportNames($phpcsFile, $stackPtr);
-		$this->recordImportedSymbols($stackPtr, $importNames);
-		$this->importedClasses = array_merge($this->importedClasses, $importNames);
+		$this->recordImportedSymbols($phpcsFile, $stackPtr, $importNames);
+		$this->symbolRecordsByFile[$phpcsFile->path]->addImportedClasses($importNames);
 	}
 
-	private function isFunctionImported(string $functionName): bool {
-		return in_array($functionName, $this->importedFunctions);
+	private function isFunctionImported(File $phpcsFile, string $functionName): bool {
+		return in_array($functionName, $this->symbolRecordsByFile[$phpcsFile->path]->importedFunctions);
 	}
 
-	private function isConstImported(string $constName): bool {
-		return in_array($constName, $this->importedConsts);
+	private function isConstImported(File $phpcsFile, string $constName): bool {
+		return in_array($constName, $this->symbolRecordsByFile[$phpcsFile->path]->importedConsts);
 	}
 
-	private function isClassImported(string $name): bool {
-		return in_array($name, $this->importedClasses);
+	private function isClassImported(File $phpcsFile, string $name): bool {
+		return in_array($name, $this->symbolRecordsByFile[$phpcsFile->path]->importedClasses);
 	}
 
 	private function isClassDefined(File $phpcsFile, string $className): bool {
@@ -229,16 +227,16 @@ class RequireImportsSniff implements Sniff {
 		return false;
 	}
 
-	private function markSymbolUsed(Symbol $symbol) {
-		$record = $this->getSymbolRecord($symbol);
+	private function markSymbolUsed(File $phpcsFile, Symbol $symbol) {
+		$record = $this->getSymbolRecord($phpcsFile, $symbol);
 		if (! $record) {
 			return;
 		}
 		$record->markUsed();
 	}
 
-	private function getSymbolRecord(Symbol $symbol) {
-		foreach ($this->importedSymbolRecords as $record) {
+	private function getSymbolRecord(File $phpcsFile, Symbol $symbol) {
+		foreach ($this->symbolRecordsByFile[$phpcsFile->path]->importedSymbolRecords as $record) {
 			if ($record->getName() === $symbol->getTopLevelNamespace()) {
 				return $record;
 			}
@@ -253,7 +251,7 @@ class RequireImportsSniff implements Sniff {
 			return;
 		}
 		// For each import, if the Symbol was not used, mark a warning
-		foreach ($this->importedSymbolRecords as $record) {
+		foreach ($this->symbolRecordsByFile[$phpcsFile->path]->importedSymbolRecords as $record) {
 			if (! $record->isUsed()) {
 				$error = "Found unused symbol '{$record->getName()}'.";
 				$phpcsFile->addWarning($error, $record->getPtr(), 'Import');
