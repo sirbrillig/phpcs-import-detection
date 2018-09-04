@@ -139,6 +139,56 @@ class RequireImportsSniffTest extends TestCase {
 		$this->assertEquals($expectedLines, $lines);
 	}
 
+	public function testRequireImportsSniffFindsWordPressPatternsIfNotSet() {
+		$fixtureFile = __DIR__ . '/WordPressFixture.php';
+		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
+		$helper = new SniffTestHelper();
+		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
+		$phpcsFile->ruleset->setSniffProperty(
+			'ImportDetection\Sniffs\Imports\RequireImportsSniff',
+			'ignoreWordPressSymbols',
+			'false'
+		);
+		$phpcsFile->process();
+		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
+		$expectedLines = [
+			23,
+			32,
+			33,
+			34,
+			35,
+			36,
+			37,
+			38,
+			42,
+			45,
+			48,
+			52,
+			55,
+			60,
+			61,
+			63,
+			74,
+		];
+		$this->assertEquals($expectedLines, $lines);
+	}
+
+	public function testRequireImportsSniffIgnoresWordPressPatternsIfSet() {
+		$fixtureFile = __DIR__ . '/WordPressFixture.php';
+		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
+		$helper = new SniffTestHelper();
+		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
+		$phpcsFile->ruleset->setSniffProperty(
+			'ImportDetection\Sniffs\Imports\RequireImportsSniff',
+			'ignoreWordPressSymbols',
+			'true'
+		);
+		$phpcsFile->process();
+		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
+		$expectedLines = [ 38, 61, 63 ];
+		$this->assertEquals($expectedLines, $lines);
+	}
+
 	public function testRequireImportsSniffDoesNotCountMethodNames() {
 		$fixtureFile = __DIR__ . '/RequireImportsMethodNameFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
