@@ -208,7 +208,7 @@ class SniffHelpers {
 	public function isTokenADefinition(array $token): bool {
 		// Note: this does not handle use or define
 		$type = $token['type'] ?? '';
-		$definitionTypes = ['T_CLASS', 'T_FUNCTION', 'T_CONST'];
+		$definitionTypes = ['T_CLASS', 'T_FUNCTION', 'T_CONST', 'T_INTERFACE'];
 		return in_array($type, $definitionTypes, true);
 	}
 
