@@ -100,6 +100,17 @@ class RequireImportsSniffTest extends TestCase {
 		$this->assertEquals($expectedLines, $lines);
 	}
 
+	public function testRequireImportsSniffWorksWithInterfaces() {
+		$fixtureFile = __DIR__ . '/InterfaceFixture.php';
+		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
+		$helper = new SniffTestHelper();
+		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
+		$phpcsFile->process();
+		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
+		$expectedLines = [31];
+		$this->assertEquals($expectedLines, $lines);
+	}
+
 	public function testRequireImportsDoesNotBleedToMultipleFiles() {
 		$fixtureFile = __DIR__ . '/MultipleFilesFixtures';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
