@@ -56,13 +56,14 @@ class RequireImportsSniffTest extends TestCase {
 		$phpcsFile->process();
 		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedLines = [
-			11,
+			7,
 			12,
+			13,
 		];
 		$this->assertEquals($expectedLines, $lines);
 	}
 
-	public function testRequireImportsSniffIgnoresAllowedImports() {
+	public function testRequireImportsSniffIgnoresWhitelistedUnimportedSymbols() {
 		$fixtureFile = __DIR__ . '/RequireImportsAllowedPatternFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
@@ -74,7 +75,23 @@ class RequireImportsSniffTest extends TestCase {
 		);
 		$phpcsFile->process();
 		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
-		$expectedLines = [ 12 ];
+		$expectedLines = [ 7, 13 ];
+		$this->assertEquals($expectedLines, $lines);
+	}
+
+	public function testRequireImportsSniffIgnoresWhitelistedUnusedImports() {
+		$fixtureFile = __DIR__ . '/RequireImportsAllowedPatternFixture.php';
+		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
+		$helper = new SniffTestHelper();
+		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
+		$phpcsFile->ruleset->setSniffProperty(
+			'ImportDetection\Sniffs\Imports\RequireImportsSniff',
+			'ignoreUnimportedSymbols',
+			'/^(unused_function)$/'
+		);
+		$phpcsFile->process();
+		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
+		$expectedLines = [ 12, 13 ];
 		$this->assertEquals($expectedLines, $lines);
 	}
 
