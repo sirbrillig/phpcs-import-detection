@@ -46,7 +46,46 @@ When installing sniff standards in a project, you edit a `phpcs.xml` file with t
 </ruleset>
 ```
 
-## Ignoring Symbols
+## Sniff Codes
+
+There are two sniff codes that are reported by this sniff. Both are warnings.
+
+- `ImportDetection.Imports.RequireImports.Symbol`: A symbol has been used but not imported
+- `ImportDetection.Imports.RequireImports.Import`: A symbol has been imported and not used
+
+In any given file, you can use phpcs comments to disable these sniffs. For example, if you have a global class called `MyGlobalClass` which you don't want to import, you could use it like this:
+
+```php
+<?php
+
+$instance = new MyGlobalClass(); // phpcs:ignore ImportDetection.Imports.RequireImports.Symbol -- this class is global
+$instance->doSomething();
+```
+
+For a whole file, you can ignore a sniff like this:
+
+```php
+<?php
+// phpcs:disable ImportDetection.Imports.RequireImports.Symbol
+
+$instance = new MyGlobalClass();
+$instance->doSomething();
+```
+
+For a whole project, you can use the `phpcs.xml` file to disable these sniffs or modify their priority. For example, to disable checks for unused imports, you could use a configuration like this:
+
+```xml
+<?xml version="1.0"?>
+<ruleset name="MyStandard">
+ <description>My library.</description>
+ <rule ref="ImportDetection"/>
+ <rule ref="ImportDetection.Imports.RequireImports.Import">
+   <severity>0</severity>
+ </rule>
+</ruleset>
+```
+
+## Ignoring Symbol Patterns
 
 Oftentimes there might be global symbols that you want to use without importing or using a fully-qualified path.
 
