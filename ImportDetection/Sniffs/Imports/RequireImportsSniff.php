@@ -34,55 +34,55 @@ class RequireImportsSniff implements Sniff {
 		$symbol = $helper->getFullSymbol($phpcsFile, $stackPtr);
 		// If the symbol has been seen before (if this is a duplicate), ignore it
 		if (in_array($symbol, $this->symbolRecordsByFile[$phpcsFile->path]->seenSymbols)) {
-			$this->debug('found duplicate symbol ' . $symbol->getName());
+			$this->debug('found duplicate symbol: ' . $symbol->getName());
 			return;
 		}
 		$this->symbolRecordsByFile[$phpcsFile->path]->seenSymbols[] = $symbol;
 		// If the symbol is in the ignore list, ignore it
 		if ($this->isSymbolIgnored($symbol)) {
-			$this->debug('found ignored symbol ' . $symbol->getName());
+			$this->debug('found ignored symbol: ' . $symbol->getName());
 			$this->markSymbolUsed($phpcsFile, $symbol);
 			return;
 		}
 		// If the symbol is a fully-qualified namespace, ignore it
 		if ($symbol->isAbsoluteNamespace()) {
-			$this->debug('found absolute namespaced symbol ' . $symbol->getName());
+			$this->debug('found absolute namespaced symbol: ' . $symbol->getName());
 			return;
 		}
 		// If this symbol is a definition, ignore it
 		if ($helper->isSymbolADefinition($phpcsFile, $symbol)) {
-			$this->debug('found definition symbol ' . $symbol->getName());
+			$this->debug('found definition symbol: ' . $symbol->getName());
 			return;
 		}
 		// If this symbol is a static reference or an object reference, ignore it
 		if ($helper->isStaticReference($phpcsFile, $stackPtr) || $helper->isObjectReference($phpcsFile, $stackPtr)) {
-			$this->debug('found static symbol ' . $symbol->getName());
+			$this->debug('found static symbol: ' . $symbol->getName());
 			return;
 		}
 		// If this symbol is a namespace definition, ignore it
 		if ($helper->isWithinNamespaceStatement($phpcsFile, $symbol->getSymbolPosition())) {
-			$this->debug('found namespace definition symbol ' . $symbol->getName());
+			$this->debug('found namespace definition symbol: ' . $symbol->getName());
 			return;
 		}
 		// If this symbol is an import, ignore it
 		if ($helper->isWithinImportStatement($phpcsFile, $symbol->getSymbolPosition())) {
-			$this->debug('found symbol inside an import ' . $symbol->getName());
+			$this->debug('found symbol inside an import: ' . $symbol->getName());
 			return;
 		}
 		// If the symbol is predefined, ignore it
 		if ($helper->isPredefinedConstant($phpcsFile, $stackPtr) || $helper->isBuiltInFunction($phpcsFile, $stackPtr)) {
-			$this->debug('found predefined symbol ' . $symbol->getName());
+			$this->debug('found predefined symbol: ' . $symbol->getName());
 			return;
 		}
 		// If this symbol is a predefined typehint, ignore it
 		if ($helper->isPredefinedTypehint($phpcsFile, $stackPtr)) {
-			$this->debug('found typehint symbol ' . $symbol->getName());
+			$this->debug('found typehint symbol: ' . $symbol->getName());
 			return;
 		}
 		// If the symbol's namespace is imported or defined, ignore it
 		// If the symbol has no namespace and is itself is imported or defined, ignore it
 		if ($this->isSymbolDefined($phpcsFile, $symbol)) {
-			$this->debug('found defined symbol ' . $symbol->getName());
+			$this->debug('found defined symbol: ' . $symbol->getName());
 			$this->markSymbolUsed($phpcsFile, $symbol);
 			return;
 		}
