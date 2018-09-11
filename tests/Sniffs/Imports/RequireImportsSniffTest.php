@@ -209,6 +209,27 @@ class RequireImportsSniffTest extends TestCase {
 		$this->assertEquals($expectedLines, $lines);
 	}
 
+	public function testRequireImportsSniffFindsGlobalSymbolsInNamespaceIfConfigured() {
+		$fixtureFile = __DIR__ . '/RequireImportsAllowedPatternFixture.php';
+		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
+		$helper = new SniffTestHelper();
+		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
+		$phpcsFile->ruleset->setSniffProperty(
+			'ImportDetection\Sniffs\Imports\RequireImportsSniff',
+			'ignoreGlobalsWhenInGlobalScope',
+			'true'
+		);
+		$phpcsFile->process();
+		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
+		$expectedLines = [
+			8,
+			9,
+			15,
+			16,
+		];
+		$this->assertEquals($expectedLines, $lines);
+	}
+
 	public function testRequireImportsDoesNotBleedToMultipleFiles() {
 		$fixtureFile = __DIR__ . '/MultipleFilesFixtures';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
