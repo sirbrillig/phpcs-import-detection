@@ -14,7 +14,7 @@ class RequireImportsSniff implements Sniff {
 	private $symbolRecordsByFile = [];
 
 	public function register() {
-		return [T_USE, T_STRING, T_RETURN_TYPE, T_WHITESPACE];
+		return [T_USE, T_STRING, T_RETURN_TYPE, T_WHITESPACE, T_NAMESPACE];
 	}
 
 	public function process(File $phpcsFile, $stackPtr) {
@@ -23,6 +23,9 @@ class RequireImportsSniff implements Sniff {
 		$token = $tokens[$stackPtr];
 		// Keep one set of symbol records per file
 		$this->symbolRecordsByFile[$phpcsFile->path] = $this->symbolRecordsByFile[$phpcsFile->path] ?? new FileSymbolRecord;
+		if ($token['type'] === 'T_NAMESPACE') {
+			return $this->processNamespace($phpcsFile, $stackPtr);
+		}
 		if ($token['type'] === 'T_WHITESPACE') {
 			$this->debug('found whitespace');
 			return $this->processEndOfFile($phpcsFile, $stackPtr);
@@ -272,5 +275,18 @@ class RequireImportsSniff implements Sniff {
 				$phpcsFile->addWarning($error, $record->getSymbolPosition(), 'Import');
 			}
 		}
+	}
+
+	private function processNamespace(File $phpcsFile, int $stackPtr) {
+		$helper = new SniffHelpers();
+		$symbols = $helper->getImportedSymbolsFromImportStatement($phpcsFile, $stackPtr);
+		if (count($symbols) < 1) {
+			return;
+		}
+		if (count($symbols) > 1) {
+			throw new \Exception('Found more than one namespace: ' . var_export($symbols, true));
+		}
+		$this->debug('we are in the namespace: ' . $symbols[0]->getName());
+		$this->symbolRecordsByFile[$phpcsFile->path]->activeNamespace = $symbols[0];
 	}
 }

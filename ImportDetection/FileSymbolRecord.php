@@ -8,6 +8,7 @@ class FileSymbolRecord {
 	public $importedClasses = [];
 	public $importedSymbolRecords = [];
 	public $seenSymbols = [];
+	public $activeNamespace = null;
 
 	public function addImportedFunctions($names) {
 		$this->importedFunctions = array_merge($this->importedFunctions, $names);
