@@ -20,4 +20,8 @@ class FileSymbolRecord {
 	public function addImportedConsts($names) {
 		$this->importedConsts = array_merge($this->importedConsts, $names);
 	}
+
+	public function addImportedSymbolRecords($names) {
+		$this->importedSymbolRecords = array_merge($this->importedSymbolRecords, $names);
+	}
 }
