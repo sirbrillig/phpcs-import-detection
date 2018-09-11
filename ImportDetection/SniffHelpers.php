@@ -108,6 +108,37 @@ class SniffHelpers {
 		return $collectedSymbols;
 	}
 
+	private function getImportedSymbolsFromGroupStatement(File $phpcsFile, int $stackPtr): array {
+		$tokens = $phpcsFile->getTokens();
+		$endBracketPtr = $phpcsFile->findNext([T_CLOSE_USE_GROUP], $stackPtr + 1);
+		$startBracketPtr = $phpcsFile->findNext([T_OPEN_USE_GROUP], $stackPtr + 1);
+		if (! $endBracketPtr || ! $startBracketPtr) {
+			throw new \Exception('Invalid group import statement starting at token ' . $stackPtr . ': ' . $tokens[$stackPtr]['content']);
+		}
+
+		// Get the namespace for the import first, so we can attach it to each Symbol
+		$importNamespace = $this->getFullSymbol($phpcsFile, $startBracketPtr - 1);
+
+		$lastImportPtr = $stackPtr;
+		$collectedSymbols = [];
+		$isLastImport = false;
+		while (! $isLastImport) {
+			$nextEndOfImportPtr = $phpcsFile->findNext([T_COMMA], $lastImportPtr + 1, $endBracketPtr);
+			if (! $nextEndOfImportPtr) {
+				$isLastImport = true;
+				$nextEndOfImportPtr = $endBracketPtr;
+			}
+			$lastStringPtr = $phpcsFile->findPrevious([T_STRING], $nextEndOfImportPtr - 1, $stackPtr);
+			if (! $lastStringPtr || ! isset($tokens[$lastStringPtr])) {
+				break;
+			}
+			$fullSymbolParts = array_merge($importNamespace->getTokens(), [Symbol::getTokenWithPosition($tokens[$lastStringPtr], $lastStringPtr)]);
+			$collectedSymbols[] = new Symbol($fullSymbolParts);
+			$lastImportPtr = $nextEndOfImportPtr;
+		}
+		return $collectedSymbols;
+	}
+
 	public function getImportNames(File $phpcsFile, $stackPtr): array {
 		$tokens = $phpcsFile->getTokens();
 
@@ -136,6 +167,36 @@ class SniffHelpers {
 			return [];
 		}
 		return [$tokens[$lastStringPtr]['content']];
+	}
+
+	public function getImportedSymbolsFromImportStatement(File $phpcsFile, $stackPtr): array {
+		$tokens = $phpcsFile->getTokens();
+
+		$endOfStatementPtr = $phpcsFile->findNext([T_SEMICOLON], $stackPtr + 1);
+		if (! $endOfStatementPtr) {
+			return [];
+		}
+
+		// Process grouped imports differently
+		$nextBracketPtr = $phpcsFile->findNext([T_OPEN_USE_GROUP], $stackPtr + 1, $endOfStatementPtr);
+		if ($nextBracketPtr) {
+			return $this->getImportedSymbolsFromGroupStatement($phpcsFile, $stackPtr);
+		}
+
+		// Get the last string before the last semicolon, comma, or closing curly bracket
+		$endOfImportPtr = $phpcsFile->findPrevious(
+			[T_COMMA, T_CLOSE_USE_GROUP],
+			$stackPtr + 1,
+			$endOfStatementPtr
+		);
+		if (! $endOfImportPtr) {
+			$endOfImportPtr = $endOfStatementPtr;
+		}
+		$lastStringPtr = $phpcsFile->findPrevious([T_STRING], $endOfImportPtr - 1, $stackPtr);
+		if (! $lastStringPtr || ! isset($tokens[$lastStringPtr])) {
+			return [];
+		}
+		return [$this->getFullSymbol($phpcsFile, $lastStringPtr)];
 	}
 
 	public function getPreviousStatementPtr(File $phpcsFile, int $stackPtr): int {

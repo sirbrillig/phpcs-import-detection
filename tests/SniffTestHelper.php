@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable PSR1.Classes.ClassDeclaration.MultipleClasses
 declare(strict_types=1);
 
 namespace ImportDetectionTest;
@@ -7,6 +8,13 @@ use PHP_CodeSniffer\Files\LocalFile;
 use PHP_CodeSniffer\Files\FileList;
 use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Config;
+
+class MessageRecord {
+	public $rowNumber;
+	public $columnNumber;
+	public $message;
+	public $source;
+}
 
 class SniffTestHelper {
 	public function prepareLocalFileForSniffs($sniffFiles, string $fixtureFile): LocalFile {
@@ -45,6 +53,23 @@ class SniffTestHelper {
 			}
 			$phpcsFile->process();
 		}
+	}
+
+	public function getWarningMessageRecords(array $messages) {
+		$messageRecords = [];
+		foreach ($messages as $rowNumber => $messageRow) {
+			foreach ($messageRow as $columnNumber => $messageArrays) {
+				foreach ($messageArrays as $messageArray) {
+					$messageRecord = new MessageRecord();
+					$messageRecord->rowNumber = $rowNumber;
+					$messageRecord->columnNumber = $columnNumber;
+					$messageRecord->message = $messageArray['message'];
+					$messageRecord->source = $messageArray['source'];
+					$messageRecords[] = $messageRecord;
+				}
+			}
+		}
+		return $messageRecords;
 	}
 
 	public function getLineNumbersFromMessages(array $messages): array {

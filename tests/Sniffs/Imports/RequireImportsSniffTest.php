@@ -54,11 +54,41 @@ class RequireImportsSniffTest extends TestCase {
 			''
 		);
 		$phpcsFile->process();
-		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
+		$messages = $helper->getWarningMessageRecords($phpcsFile->getWarnings());
+		$messages = array_values(array_filter($messages, function ($message) {
+			return $message->source === 'ImportDetection.Imports.RequireImports.Symbol';
+		}));
+		$lines = array_map(function ($message) {
+			return $message->rowNumber;
+		}, $messages);
 		$expectedLines = [
-			7,
-			12,
-			13,
+			15,
+			16,
+		];
+		$this->assertEquals($expectedLines, $lines);
+	}
+
+	public function testRequireImportsSniffFindsUnusedImportsWithNoConfig() {
+		$fixtureFile = __DIR__ . '/RequireImportsAllowedPatternFixture.php';
+		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
+		$helper = new SniffTestHelper();
+		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
+		$phpcsFile->ruleset->setSniffProperty(
+			'ImportDetection\Sniffs\Imports\RequireImportsSniff',
+			'ignoreUnimportedSymbols',
+			''
+		);
+		$phpcsFile->process();
+		$messages = $helper->getWarningMessageRecords($phpcsFile->getWarnings());
+		$messages = array_values(array_filter($messages, function ($message) {
+			return $message->source === 'ImportDetection.Imports.RequireImports.Import';
+		}));
+		$lines = array_map(function ($message) {
+			return $message->rowNumber;
+		}, $messages);
+		$expectedLines = [
+			8,
+			9,
 		];
 		$this->assertEquals($expectedLines, $lines);
 	}
@@ -74,8 +104,16 @@ class RequireImportsSniffTest extends TestCase {
 			'/^(something_to_ignore|whitelisted_function|allowed_funcs_\w+|another_[a-z_]+)$/'
 		);
 		$phpcsFile->process();
-		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
-		$expectedLines = [ 7, 13 ];
+		$messages = $helper->getWarningMessageRecords($phpcsFile->getWarnings());
+		$messages = array_values(array_filter($messages, function ($message) {
+			return $message->source === 'ImportDetection.Imports.RequireImports.Symbol';
+		}));
+		$lines = array_map(function ($message) {
+			return $message->rowNumber;
+		}, $messages);
+		$expectedLines = [
+			16,
+		];
 		$this->assertEquals($expectedLines, $lines);
 	}
 
@@ -87,11 +125,17 @@ class RequireImportsSniffTest extends TestCase {
 		$phpcsFile->ruleset->setSniffProperty(
 			'ImportDetection\Sniffs\Imports\RequireImportsSniff',
 			'ignoreUnimportedSymbols',
-			'/^(unused_function)$/'
+			'/\\\unused_function|\\\four_function/'
 		);
 		$phpcsFile->process();
-		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
-		$expectedLines = [ 12, 13 ];
+		$messages = $helper->getWarningMessageRecords($phpcsFile->getWarnings());
+		$messages = array_values(array_filter($messages, function ($message) {
+			return $message->source === 'ImportDetection.Imports.RequireImports.Import';
+		}));
+		$lines = array_map(function ($message) {
+			return $message->rowNumber;
+		}, $messages);
+		$expectedLines = [];
 		$this->assertEquals($expectedLines, $lines);
 	}
 
