@@ -5,6 +5,7 @@ namespace ImportDetection;
 
 class Symbol {
 	private $tokens;
+	private $isUsed;
 
 	public function __construct(array $tokens) {
 		if (empty($tokens)) {
@@ -16,6 +17,7 @@ class Symbol {
 			}
 		}
 		$this->tokens = $tokens;
+		$this->isUsed = false;
 	}
 
 	public static function getTokenWithPosition(array $token, int $stackPtr): array {
@@ -49,6 +51,14 @@ class Symbol {
 
 	public function getSymbolPosition(): int {
 		return $this->tokens[0]['tokenPosition'] ?? 1;
+	}
+
+	public function markUsed() {
+		$this->isUsed = true;
+	}
+
+	public function isUsed(): bool {
+		return $this->isUsed;
 	}
 
 	private function joinSymbolParts(array $tokens): string {
