@@ -8,7 +8,12 @@ class Symbol {
 
 	public function __construct(array $tokens) {
 		if (empty($tokens)) {
-			throw new \Exception('Symbols cannot be empty');
+			throw new \Exception('Cannot construct Symbol with no tokens');
+		}
+		foreach ($tokens as $token) {
+			if (empty($token) || ! is_array($token)) {
+				throw new \Exception('Cannot construct Symbol with invalid token: ' . var_export($token, true));
+			}
 		}
 		$this->tokens = $tokens;
 	}
