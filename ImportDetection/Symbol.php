@@ -42,6 +42,10 @@ class Symbol {
 		return $type === 'T_NS_SEPARATOR';
 	}
 
+	public function isNamespaced(): bool {
+		return count($this->tokens) > 1;
+	}
+
 	/**
 	 * @return string|null
 	 */

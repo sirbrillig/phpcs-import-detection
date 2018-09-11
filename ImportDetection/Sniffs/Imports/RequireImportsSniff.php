@@ -10,6 +10,7 @@ use PHP_CodeSniffer\Files\File;
 
 class RequireImportsSniff implements Sniff {
 	public $ignoreUnimportedSymbols = null;
+	public $ignoreGlobalsWhenInGlobalScope = false;
 
 	private $symbolRecordsByFile = [];
 
@@ -92,6 +93,14 @@ class RequireImportsSniff implements Sniff {
 			$this->markSymbolUsed($phpcsFile, $symbol);
 			return;
 		}
+		// If the symbol is global, we are in the global namespace, and
+		// configured to ignore global symbols in the global namespace,
+		// ignore it
+		if ($this->ignoreGlobalsWhenInGlobalScope && ! $symbol->isNamespaced()) {
+			$this->debug('found global symbol in global namespace: ' . $symbol->getName());
+			return;
+		}
+		$this->debug('found unimported symbol: ' . $symbol->getName());
 		$error = "Found unimported symbol '{$symbol->getName()}'.";
 		$phpcsFile->addWarning($error, $stackPtr, 'Symbol');
 	}
