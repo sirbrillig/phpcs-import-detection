@@ -96,7 +96,7 @@ class RequireImportsSniff implements Sniff {
 		// If the symbol is global, we are in the global namespace, and
 		// configured to ignore global symbols in the global namespace,
 		// ignore it
-		if ($this->ignoreGlobalsWhenInGlobalScope && ! $symbol->isNamespaced()) {
+		if ($this->ignoreGlobalsWhenInGlobalScope && ! $symbol->isNamespaced() && ! $this->symbolRecordsByFile[$phpcsFile->path]->activeNamespace) {
 			$this->debug('found global symbol in global namespace: ' . $symbol->getName());
 			return;
 		}
