@@ -31,6 +31,10 @@ class Symbol {
 		return $this->joinSymbolParts($this->tokens);
 	}
 
+	public function getAlias(): string {
+		return $this->tokens[count($this->tokens) - 1]['content'];
+	}
+
 	public function isAbsoluteNamespace(): bool {
 		$type = $this->tokens[0]['type'] ?? '';
 		return $type === 'T_NS_SEPARATOR';
