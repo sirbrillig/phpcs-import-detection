@@ -108,6 +108,23 @@ You can ignore certain patterns by using the `ignoreUnimportedSymbols` config op
 
 Despite the name, you can also use the `ignoreUnimportedSymbols` pattern to ignore specific unused imports.
 
+## Ignoring Global Symbols in Global Namespace
+
+If a file is in the global namespace, then sometimes it may be unnecessary to import functions that are also global. If you'd like to ignore global symbol use in the global namespace, you can enable the `ignoreGlobalsWhenInGlobalScope` option, like this:
+
+```xml
+<?xml version="1.0"?>
+<ruleset name="MyStandard">
+ <description>My library.</description>
+ <rule ref="ImportDetection"/>
+ <rule ref="ImportDetection.Imports.RequireImports">
+   <properties>
+    <property name="ignoreGlobalsWhenInGlobalScope" value="true"/>
+  </properties>
+ </rule>
+</ruleset>
+```
+
 ## Usage
 
 Most editors have a phpcs plugin available, but you can also run phpcs manually. To run phpcs on a file in your project, just use the command-line as follows (the `-s` causes the sniff code to be shown, which is very important for learning about an error).

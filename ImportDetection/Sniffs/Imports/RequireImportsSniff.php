@@ -10,11 +10,12 @@ use PHP_CodeSniffer\Files\File;
 
 class RequireImportsSniff implements Sniff {
 	public $ignoreUnimportedSymbols = null;
+	public $ignoreGlobalsWhenInGlobalScope = false;
 
 	private $symbolRecordsByFile = [];
 
 	public function register() {
-		return [T_USE, T_STRING, T_RETURN_TYPE, T_WHITESPACE];
+		return [T_USE, T_STRING, T_RETURN_TYPE, T_WHITESPACE, T_NAMESPACE];
 	}
 
 	public function process(File $phpcsFile, $stackPtr) {
@@ -23,6 +24,9 @@ class RequireImportsSniff implements Sniff {
 		$token = $tokens[$stackPtr];
 		// Keep one set of symbol records per file
 		$this->symbolRecordsByFile[$phpcsFile->path] = $this->symbolRecordsByFile[$phpcsFile->path] ?? new FileSymbolRecord;
+		if ($token['type'] === 'T_NAMESPACE') {
+			return $this->processNamespace($phpcsFile, $stackPtr);
+		}
 		if ($token['type'] === 'T_WHITESPACE') {
 			$this->debug('found whitespace');
 			return $this->processEndOfFile($phpcsFile, $stackPtr);
@@ -89,6 +93,14 @@ class RequireImportsSniff implements Sniff {
 			$this->markSymbolUsed($phpcsFile, $symbol);
 			return;
 		}
+		// If the symbol is global, we are in the global namespace, and
+		// configured to ignore global symbols in the global namespace,
+		// ignore it
+		if ($this->ignoreGlobalsWhenInGlobalScope && ! $symbol->isNamespaced() && ! $this->symbolRecordsByFile[$phpcsFile->path]->activeNamespace) {
+			$this->debug('found global symbol in global namespace: ' . $symbol->getName());
+			return;
+		}
+		$this->debug('found unimported symbol: ' . $symbol->getName());
 		$error = "Found unimported symbol '{$symbol->getName()}'.";
 		$phpcsFile->addWarning($error, $stackPtr, 'Symbol');
 	}
@@ -272,5 +284,18 @@ class RequireImportsSniff implements Sniff {
 				$phpcsFile->addWarning($error, $record->getSymbolPosition(), 'Import');
 			}
 		}
+	}
+
+	private function processNamespace(File $phpcsFile, int $stackPtr) {
+		$helper = new SniffHelpers();
+		$symbols = $helper->getImportedSymbolsFromImportStatement($phpcsFile, $stackPtr);
+		if (count($symbols) < 1) {
+			return;
+		}
+		if (count($symbols) > 1) {
+			throw new \Exception('Found more than one namespace: ' . var_export($symbols, true));
+		}
+		$this->debug('we are in the namespace: ' . $symbols[0]->getName());
+		$this->symbolRecordsByFile[$phpcsFile->path]->activeNamespace = $symbols[0];
 	}
 }
