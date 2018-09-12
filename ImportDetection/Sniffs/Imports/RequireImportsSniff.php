@@ -5,12 +5,14 @@ namespace ImportDetection\Sniffs\Imports;
 use ImportDetection\Symbol;
 use ImportDetection\SniffHelpers;
 use ImportDetection\FileSymbolRecord;
+use ImportDetection\WordPressSymbols;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 
 class RequireImportsSniff implements Sniff {
 	public $ignoreUnimportedSymbols = null;
 	public $ignoreGlobalsWhenInGlobalScope = false;
+	public $ignoreWordPressSymbols = null;
 
 	private $symbolRecordsByFile = [];
 
@@ -115,16 +117,33 @@ class RequireImportsSniff implements Sniff {
 	}
 
 	private function isSymbolIgnored(Symbol $symbol): bool {
+		$ignorePattern = $this->getIgnoredSymbolPattern();
+		$doesSymbolMatchIgnorePattern = $this->doesSymbolMatchPattern($symbol, $ignorePattern);
+		if ($doesSymbolMatchIgnorePattern) {
+			return true;
+		}
+
+		$wordPressPatterns = $this->getIgnoredWordPressSymbolPatterns();
+		$matchingWordPressPatterns = array_values(array_filter($wordPressPatterns, function (string $pattern) use ($symbol): bool {
+			return $this->doesSymbolMatchPattern($symbol, "/${pattern}/");
+		}));
+		return count($matchingWordPressPatterns) > 0;
+	}
+
+	private function doesSymbolMatchPattern(Symbol $symbol, string $pattern): bool {
 		$symbolName = $symbol->getName();
-		$pattern = $this->getIgnoredSymbolPattern();
 		if (empty($pattern)) {
 			return false;
 		}
 		try {
 			return (1 === preg_match($pattern, $symbolName));
 		} catch (\Exception $err) {
-			throw new \Exception("ignoreUnimportedSymbols contains an invalid pattern: '{$pattern}'");
+			throw new \Exception("Invalid ignore pattern found: '{$pattern}'");
 		}
+	}
+
+	private function getIgnoredWordPressSymbolPatterns() {
+		return empty($this->ignoreWordPressSymbols) ? [] : WordPressSymbols::getWordPressSymbolPatterns();
 	}
 
 	private function getIgnoredSymbolPattern() {

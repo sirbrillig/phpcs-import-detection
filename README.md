@@ -125,6 +125,23 @@ If a file is in the global namespace, then sometimes it may be unnecessary to im
 </ruleset>
 ```
 
+## Ignoring WordPress Patterns
+
+A common use-case is to ignore all the globally available WordPress symbols. Rather than trying to come up with a pattern to ignore them all yourself, you can set the config option `ignoreWordPressSymbols` which will ignore as many of them as it knows about. For example:
+
+```xml
+<?xml version="1.0"?>
+<ruleset name="MyStandard">
+ <description>My library.</description>
+ <rule ref="ImportDetection"/>
+ <rule ref="ImportDetection.Imports.RequireImports">
+   <properties>
+    <property name="ignoreWordPressSymbols" value="true"/>
+  </properties>
+ </rule>
+</ruleset>
+```
+
 ## Usage
 
 Most editors have a phpcs plugin available, but you can also run phpcs manually. To run phpcs on a file in your project, just use the command-line as follows (the `-s` causes the sniff code to be shown, which is very important for learning about an error).
