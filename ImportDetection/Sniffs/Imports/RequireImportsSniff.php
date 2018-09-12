@@ -281,8 +281,9 @@ class RequireImportsSniff implements Sniff {
 
 	private function getRecordedImportedSymbolMatchingSymbol(File $phpcsFile, Symbol $symbol) {
 		foreach ($this->symbolRecordsByFile[$phpcsFile->path]->importedSymbolRecords as $record) {
-			$this->debug("comparing symbol {$symbol->getTopLevelNamespace()} to alias {$record->getAlias()}");
-			if ($record->getAlias() === $symbol->getTopLevelNamespace()) {
+			$namespaceOrAlias = $symbol->getTopLevelNamespace() ?? $symbol->getAlias();
+			$this->debug("comparing symbol {$namespaceOrAlias} to alias {$record->getAlias()}");
+			if ($record->getAlias() === $namespaceOrAlias) {
 				return $record;
 			}
 		}
