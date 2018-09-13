@@ -298,4 +298,17 @@ class RequireImportsSniffTest extends TestCase {
 		];
 		$this->assertEquals($expectedLines, $linesByFile);
 	}
+
+	public function testRequireImportsFindsUnimportedNamespaceIdenticalToClass() {
+		$fixtureFile = __DIR__ . '/ClassUsedAsNamespaceFixture.php';
+		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
+		$helper = new SniffTestHelper();
+		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
+		$phpcsFile->process();
+		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
+		$expectedLines = [
+			7,
+		];
+		$this->assertEquals($expectedLines, $lines);
+	}
 }

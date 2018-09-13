@@ -50,6 +50,9 @@ class Symbol {
 	 * @return string|null
 	 */
 	public function getTopLevelNamespace() {
+		if (! $this->isNamespaced()) {
+			return null;
+		}
 		return $this->tokens[0]['content'] ?? null;
 	}
 

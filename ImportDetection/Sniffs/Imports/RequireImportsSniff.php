@@ -152,12 +152,20 @@ class RequireImportsSniff implements Sniff {
 
 	private function isSymbolDefined(File $phpcsFile, Symbol $symbol): bool {
 		$namespace = $symbol->getTopLevelNamespace();
-		// If the symbol's namespace is imported or defined, ignore it
+		// If the symbol's namespace is imported, ignore it
 		if ($namespace) {
-			return $this->isNamespaceImportedOrDefined($phpcsFile, $namespace);
+			return $this->isNamespaceImported($phpcsFile, $namespace);
 		}
 		// If the symbol has no namespace and is itself is imported or defined, ignore it
 		return $this->isNamespaceImportedOrDefined($phpcsFile, $symbol->getName());
+	}
+
+	private function isNamespaceImported(File $phpcsFile, string $namespace): bool {
+		return (
+			$this->isClassImported($phpcsFile, $namespace)
+			|| $this->isFunctionImported($phpcsFile, $namespace)
+			|| $this->isConstImported($phpcsFile, $namespace)
+		);
 	}
 
 	private function isNamespaceImportedOrDefined(File $phpcsFile, string $namespace): bool {
@@ -281,8 +289,9 @@ class RequireImportsSniff implements Sniff {
 
 	private function getRecordedImportedSymbolMatchingSymbol(File $phpcsFile, Symbol $symbol) {
 		foreach ($this->symbolRecordsByFile[$phpcsFile->path]->importedSymbolRecords as $record) {
-			$this->debug("comparing symbol {$symbol->getTopLevelNamespace()} to alias {$record->getAlias()}");
-			if ($record->getAlias() === $symbol->getTopLevelNamespace()) {
+			$namespaceOrAlias = $symbol->getTopLevelNamespace() ?? $symbol->getAlias();
+			$this->debug("comparing symbol {$namespaceOrAlias} to alias {$record->getAlias()}");
+			if ($record->getAlias() === $namespaceOrAlias) {
 				return $record;
 			}
 		}
