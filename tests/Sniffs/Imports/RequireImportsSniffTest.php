@@ -222,6 +222,17 @@ class RequireImportsSniffTest extends TestCase {
 		$this->assertEquals($expectedLines, $lines);
 	}
 
+	public function testRequireImportsSniffWorksWithTraits() {
+		$fixtureFile = __DIR__ . '/TraitFixture.php';
+		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
+		$helper = new SniffTestHelper();
+		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
+		$phpcsFile->process();
+		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
+		$expectedLines = [37];
+		$this->assertEquals($expectedLines, $lines);
+	}
+
 	public function testRequireImportsSniffFindsGlobalSymbolsIfNoConfig() {
 		$fixtureFile = __DIR__ . '/GlobalNamespaceFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';

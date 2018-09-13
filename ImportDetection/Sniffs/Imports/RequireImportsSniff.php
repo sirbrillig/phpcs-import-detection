@@ -239,13 +239,13 @@ class RequireImportsSniff implements Sniff {
 	}
 
 	private function isClassDefined(File $phpcsFile, string $className): bool {
-		$classPtr = $phpcsFile->findNext([T_CLASS, T_INTERFACE], 0);
+		$classPtr = $phpcsFile->findNext([T_CLASS, T_INTERFACE, T_TRAIT], 0);
 		while ($classPtr) {
 			$thisClassName = $phpcsFile->getDeclarationName($classPtr);
 			if ($className === $thisClassName) {
 				return true;
 			}
-			$classPtr = $phpcsFile->findNext([T_CLASS, T_INTERFACE], $classPtr + 1);
+			$classPtr = $phpcsFile->findNext([T_CLASS, T_INTERFACE, T_TRAIT], $classPtr + 1);
 		}
 		return false;
 	}
