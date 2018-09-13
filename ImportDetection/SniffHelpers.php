@@ -83,31 +83,6 @@ class SniffHelpers {
 		return 'class';
 	}
 
-	private function getImportNamesFromGroup(File $phpcsFile, int $stackPtr): array {
-		$tokens = $phpcsFile->getTokens();
-		$endBracketPtr = $phpcsFile->findNext([T_CLOSE_USE_GROUP], $stackPtr + 1);
-		if (! $endBracketPtr) {
-			return [];
-		}
-		$lastImportPtr = $stackPtr;
-		$collectedSymbols = [];
-		$isLastImport = false;
-		while (! $isLastImport) {
-			$nextEndOfImportPtr = $phpcsFile->findNext([T_COMMA], $lastImportPtr + 1, $endBracketPtr);
-			if (! $nextEndOfImportPtr) {
-				$isLastImport = true;
-				$nextEndOfImportPtr = $endBracketPtr;
-			}
-			$lastStringPtr = $phpcsFile->findPrevious([T_STRING], $nextEndOfImportPtr - 1, $stackPtr);
-			if (! $lastStringPtr || ! isset($tokens[$lastStringPtr])) {
-				break;
-			}
-			$collectedSymbols[] = $tokens[$lastStringPtr]['content'];
-			$lastImportPtr = $nextEndOfImportPtr;
-		}
-		return $collectedSymbols;
-	}
-
 	private function getImportedSymbolsFromGroupStatement(File $phpcsFile, int $stackPtr): array {
 		$tokens = $phpcsFile->getTokens();
 		$endBracketPtr = $phpcsFile->findNext([T_CLOSE_USE_GROUP], $stackPtr + 1);
@@ -140,33 +115,10 @@ class SniffHelpers {
 	}
 
 	public function getImportNames(File $phpcsFile, $stackPtr): array {
-		$tokens = $phpcsFile->getTokens();
-
-		$endOfStatementPtr = $phpcsFile->findNext([T_SEMICOLON], $stackPtr + 1);
-		if (! $endOfStatementPtr) {
-			return [];
-		}
-
-		// Process grouped imports differently
-		$nextBracketPtr = $phpcsFile->findNext([T_OPEN_USE_GROUP], $stackPtr + 1, $endOfStatementPtr);
-		if ($nextBracketPtr) {
-			return $this->getImportNamesFromGroup($phpcsFile, $nextBracketPtr);
-		}
-
-		// Get the last string before the last semicolon, comma, or closing curly bracket
-		$endOfImportPtr = $phpcsFile->findPrevious(
-			[T_COMMA, T_CLOSE_USE_GROUP],
-			$stackPtr + 1,
-			$endOfStatementPtr
-		);
-		if (! $endOfImportPtr) {
-			$endOfImportPtr = $endOfStatementPtr;
-		}
-		$lastStringPtr = $phpcsFile->findPrevious([T_STRING], $endOfImportPtr - 1, $stackPtr);
-		if (! $lastStringPtr || ! isset($tokens[$lastStringPtr])) {
-			return [];
-		}
-		return [$tokens[$lastStringPtr]['content']];
+		$symbols = $this->getImportedSymbolsFromImportStatement($phpcsFile, $stackPtr);
+		return array_map(function ($symbol) {
+			return $symbol->getAlias();
+		}, $symbols);
 	}
 
 	public function getImportedSymbolsFromImportStatement(File $phpcsFile, $stackPtr): array {
