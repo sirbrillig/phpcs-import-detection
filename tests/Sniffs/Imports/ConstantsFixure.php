@@ -1,7 +1,7 @@
 <?php
-use A\{B, C};
-use A\{D, E};
-use A\{
+use NamespaceName\{B, C};
+use NamespaceName\{D, E};
+use NamespaceName\{
 	K,
 	P,
 };
