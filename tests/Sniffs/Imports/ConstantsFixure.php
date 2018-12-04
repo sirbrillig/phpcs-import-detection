@@ -1,7 +1,7 @@
 <?php
-use NamespaceName\{B, C};
-use NamespaceName\{D, E};
-use NamespaceName\{
+use const NamespaceName\{B, C};
+use const NamespaceName\{D, E};
+use const NamespaceName\{
 	K,
 	P,
 };
