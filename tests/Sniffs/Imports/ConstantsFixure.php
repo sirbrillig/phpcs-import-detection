@@ -3,7 +3,7 @@ use A\{B, C};
 use A\{D, E};
 use A\{
 	K,
-	P
+	P,
 };
 
 echo C;
