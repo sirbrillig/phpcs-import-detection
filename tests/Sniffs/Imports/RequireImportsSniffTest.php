@@ -322,4 +322,18 @@ class RequireImportsSniffTest extends TestCase {
 		];
 		$this->assertEquals($expectedLines, $lines);
 	}
+
+	public function testRequireImportsNoticesUnusedConstants() {
+		$fixtureFile = __DIR__ . '/ConstantsFixure.php';
+		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
+		$helper = new SniffTestHelper();
+		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
+		$phpcsFile->process();
+		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
+		$expectedLines = [
+			3,
+			12,
+		];
+		$this->assertEquals($expectedLines, $lines);
+	}
 }

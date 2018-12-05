@@ -94,22 +94,20 @@ class SniffHelpers {
 		// Get the namespace for the import first, so we can attach it to each Symbol
 		$importNamespace = $this->getFullSymbol($phpcsFile, $startBracketPtr - 1);
 
-		$lastImportPtr = $stackPtr;
 		$collectedSymbols = [];
-		$isLastImport = false;
-		while (! $isLastImport) {
-			$nextEndOfImportPtr = $phpcsFile->findNext([T_COMMA], $lastImportPtr + 1, $endBracketPtr);
-			if (! $nextEndOfImportPtr) {
-				$isLastImport = true;
-				$nextEndOfImportPtr = $endBracketPtr;
-			}
-			$lastStringPtr = $phpcsFile->findPrevious([T_STRING], $nextEndOfImportPtr - 1, $stackPtr);
-			if (! $lastStringPtr || ! isset($tokens[$lastStringPtr])) {
+		$lastStringPtr = $startBracketPtr;
+		while ($lastStringPtr < $endBracketPtr) {
+			$nextStringPtr = $phpcsFile->findNext([T_STRING], $lastStringPtr + 1, $endBracketPtr);
+			if (! $nextStringPtr || ! isset($tokens[$nextStringPtr])) {
 				break;
 			}
-			$fullSymbolParts = array_merge($importNamespace->getTokens(), [Symbol::getTokenWithPosition($tokens[$lastStringPtr], $lastStringPtr)]);
-			$collectedSymbols[] = new Symbol($fullSymbolParts);
-			$lastImportPtr = $nextEndOfImportPtr;
+			$nextCommaPtr = $phpcsFile->findNext([T_COMMA], $nextStringPtr + 1, $endBracketPtr) ?: $endBracketPtr;
+			$nextAliasPtr = $phpcsFile->findNext([T_AS], $nextStringPtr + 1, $nextCommaPtr);
+			if (! $nextAliasPtr) {
+				$fullSymbolParts = array_merge($importNamespace->getTokens(), [Symbol::getTokenWithPosition($tokens[$nextStringPtr], $nextStringPtr)]);
+				$collectedSymbols[] = new Symbol($fullSymbolParts);
+			}
+			$lastStringPtr = $nextStringPtr;
 		}
 		return $collectedSymbols;
 	}
