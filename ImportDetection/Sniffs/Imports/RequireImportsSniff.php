@@ -78,6 +78,13 @@ class RequireImportsSniff implements Sniff {
 			$this->debug('found symbol inside an import: ' . $symbol->getName());
 			return;
 		}
+		// If the symbol's namespace is imported or defined, ignore it
+		// If the symbol has no namespace and is itself is imported or defined, ignore it
+		if ($this->isSymbolDefined($phpcsFile, $symbol)) {
+			$this->debug('found defined symbol: ' . $symbol->getName());
+			$this->markSymbolUsed($phpcsFile, $symbol);
+			return;
+		}
 		// If the symbol is predefined, ignore it
 		if ($helper->isPredefinedConstant($phpcsFile, $stackPtr) || $helper->isBuiltInFunction($phpcsFile, $stackPtr)) {
 			$this->debug('found predefined symbol: ' . $symbol->getName());
@@ -86,13 +93,6 @@ class RequireImportsSniff implements Sniff {
 		// If this symbol is a predefined typehint, ignore it
 		if ($helper->isPredefinedTypehint($phpcsFile, $stackPtr)) {
 			$this->debug('found typehint symbol: ' . $symbol->getName());
-			return;
-		}
-		// If the symbol's namespace is imported or defined, ignore it
-		// If the symbol has no namespace and is itself is imported or defined, ignore it
-		if ($this->isSymbolDefined($phpcsFile, $symbol)) {
-			$this->debug('found defined symbol: ' . $symbol->getName());
-			$this->markSymbolUsed($phpcsFile, $symbol);
 			return;
 		}
 		// If the symbol is global, we are in the global namespace, and
