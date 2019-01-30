@@ -92,23 +92,40 @@ class SniffHelpers {
 		}
 
 		// Get the namespace for the import first, so we can attach it to each Symbol
-		$importNamespace = $this->getFullSymbol($phpcsFile, $startBracketPtr - 1);
+		$importPrefixSymbol = $this->getFullSymbol($phpcsFile, $startBracketPtr - 1);
 
 		$collectedSymbols = [];
 		$lastStringPtr = $startBracketPtr;
+
 		while ($lastStringPtr < $endBracketPtr) {
-			$nextStringPtr = $phpcsFile->findNext([T_STRING], $lastStringPtr + 1, $endBracketPtr);
-			if (! $nextStringPtr || ! isset($tokens[$nextStringPtr])) {
-				break;
+			$commaPtr = $phpcsFile->findNext([T_COMMA], $lastStringPtr + 1, $endBracketPtr) ?: $endBracketPtr;
+			$aliasPtr = $phpcsFile->findNext([T_AS], $lastStringPtr + 1, $commaPtr);
+			$aliasSymbol = null;
+
+			if ($aliasPtr) {
+				$aliasStringPtr = $phpcsFile->findNext([T_STRING], $aliasPtr + 1, $commaPtr);
+				$aliasSymbol = new Symbol([Symbol::getTokenWithPosition($tokens[$aliasStringPtr], $aliasStringPtr)]);
 			}
-			$nextCommaPtr = $phpcsFile->findNext([T_COMMA], $nextStringPtr + 1, $endBracketPtr) ?: $endBracketPtr;
-			$nextAliasPtr = $phpcsFile->findNext([T_AS], $nextStringPtr + 1, $nextCommaPtr);
-			if (! $nextAliasPtr) {
-				$fullSymbolParts = array_merge($importNamespace->getTokens(), [Symbol::getTokenWithPosition($tokens[$nextStringPtr], $nextStringPtr)]);
-				$collectedSymbols[] = new Symbol($fullSymbolParts);
+
+			$endOfStringsPtr = $aliasPtr ?: $commaPtr;
+			$importSuffixSymbols = [];
+
+			do {
+				$lastStringPtr = $phpcsFile->findNext([T_STRING, T_NS_SEPARATOR], $lastStringPtr + 1, $endOfStringsPtr);
+
+				if ($lastStringPtr) {
+					$importSuffixSymbols[] = Symbol::getTokenWithPosition($tokens[$lastStringPtr], $lastStringPtr);
+				}
+			} while ($lastStringPtr);
+
+			$lastStringPtr = $commaPtr;
+
+			if (! empty($importSuffixSymbols)) {
+				$importCompleteSymbol = array_merge($importPrefixSymbol->getTokens(), $importSuffixSymbols);
+				$collectedSymbols[] = new Symbol($importCompleteSymbol, $aliasSymbol);
 			}
-			$lastStringPtr = $nextStringPtr;
 		}
+
 		return $collectedSymbols;
 	}
 

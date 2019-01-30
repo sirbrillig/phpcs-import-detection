@@ -323,6 +323,33 @@ class RequireImportsSniffTest extends TestCase {
 		$this->assertEquals($expectedLines, $lines);
 	}
 
+	public function testRequireImportsNoticesUnusedClasses() {
+		$fixtureFile = __DIR__ . '/ClassFixtures.php';
+		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
+		$helper = new SniffTestHelper();
+		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
+		$phpcsFile->process();
+
+		$warnings = $phpcsFile->getWarnings();
+		$messages = $helper->getWarningMessageRecords($warnings);
+		$messages = array_values(array_filter($messages, function ($message) {
+			return $message->source === 'ImportDetection.Imports.RequireImports.Import';
+		}));
+		$lines = array_map(function ($message) {
+			return $message->rowNumber;
+		}, $messages);
+		$expectedLines = [
+			2,
+			7,
+			7,
+		];
+		$this->assertEquals($expectedLines, $lines);
+		$this->assertCount(3, $messages);
+		$this->assertEquals('Found unused symbol \'NamespaceName\C\D\'.', $messages[0]->message);
+		$this->assertEquals('Found unused symbol \'NamespaceName\B\'.', $messages[1]->message);
+		$this->assertEquals('Found unused symbol \'NamespaceName\I\J\'.', $messages[2]->message);
+	}
+
 	public function testRequireImportsNoticesUnusedConstants() {
 		$fixtureFile = __DIR__ . '/ConstantsFixure.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';

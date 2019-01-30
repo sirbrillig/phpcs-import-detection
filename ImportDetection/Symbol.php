@@ -6,8 +6,9 @@ namespace ImportDetection;
 class Symbol {
 	private $tokens;
 	private $isUsed;
+	private $alias;
 
-	public function __construct(array $tokens) {
+	public function __construct(array $tokens, self $alias = null) {
 		if (empty($tokens)) {
 			throw new \Exception('Cannot construct Symbol with no tokens');
 		}
@@ -18,6 +19,7 @@ class Symbol {
 		}
 		$this->tokens = $tokens;
 		$this->isUsed = false;
+		$this->alias = $alias;
 	}
 
 	public static function getTokenWithPosition(array $token, int $stackPtr): array {
@@ -34,6 +36,10 @@ class Symbol {
 	}
 
 	public function getAlias(): string {
+		if ($this->alias) {
+			return $this->alias->getName();
+		}
+
 		return $this->tokens[count($this->tokens) - 1]['content'];
 	}
 
