@@ -22,7 +22,7 @@ use Notifications\Alerts;
 const TYPE = 'Car';
 
 class Car {
-	public function drive(string $whereTo, Car $previousCar = null): void {
+	public function drive(string $whereTo, Car $previousCar = null) {
 		// next line has unimported function
 		$currentWeather = getWeather();
 		if ($currentWeather === SNOW) {
