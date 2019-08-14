@@ -8,7 +8,7 @@ trait GoodTrait
     public function getTraitVar()
     {
         return $this->traitVar;
-    };
+    }
 }
 
 // Use the trait
@@ -33,6 +33,6 @@ class UseTrait
     }
 }
 
-class BadClass
+class BadClass {
     use BadTrait;
 }
