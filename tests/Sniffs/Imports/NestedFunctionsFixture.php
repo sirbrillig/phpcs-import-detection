@@ -49,3 +49,5 @@ class MyThing() {
 		});
 	}
 }
+
+nestedFuncA( 'hi' ); // warning: undefined
