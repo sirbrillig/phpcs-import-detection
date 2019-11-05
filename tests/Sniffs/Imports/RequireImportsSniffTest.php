@@ -385,6 +385,7 @@ class RequireImportsSniffTest extends TestCase {
 		$expectedLines = [
 			9,
 			19,
+			47,
 		];
 		$this->assertEquals($expectedLines, $lines);
 	}

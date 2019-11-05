@@ -18,5 +18,34 @@ class MyThing() {
 		nestedFuncB( 'hello' );
 		nestedFuncA( 'hello' ); // warning: undefined
 		$this->nestedFuncA( 'hello' );
+
+		if (true) {
+			nestedFuncB( 'hello' );
+		}
+
+		if (true) {
+			function nestedFuncC() {
+				echo 'we are deep now';
+			}
+
+			nestedFuncC();
+		}
+	}
+
+	public function doANestedThing() {
+		function nestedFuncA() {
+			echo 'nope';
+		}
+
+		\registerThing(new class {
+			public function subClassFunc() {
+				function nestedFuncC( $arg ) {
+					echo $arg . ' world';
+				}
+
+				nestedFuncC( 'hello' );
+				nestedFuncA( 'hello' ); // warning: undefined
+			}
+		});
 	}
 }
