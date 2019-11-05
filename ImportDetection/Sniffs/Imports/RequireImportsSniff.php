@@ -251,42 +251,35 @@ class RequireImportsSniff implements Sniff {
 	}
 
 	private function isFunctionDefined(File $phpcsFile, string $functionName, array $conditions): bool {
-		$helper = new SniffHelpers();
 		$tokens = $phpcsFile->getTokens();
-		// find the closest surrounding function scope; ignore if but not class/trait/anon-class/interface
-		$conditionPtr = array_reduce(array_reverse(array_keys($conditions)), function ($carry, $conditionPtr) use ($conditions) {
-			if ($carry) {
-				return $carry;
-			}
-			$type = $conditions[$conditionPtr];
-			if ($type === T_CLASS || $type === T_TRAIT || $type === T_ANON_CLASS || $type === T_INTERFACE) {
-				return $carry;
-			}
-			if ($type === T_FUNCTION) {
-				return $conditionPtr;
-			}
-			return $carry;
+		$scopesToEnter = array_filter(array_keys($conditions), function ($conditionPtr) use ($conditions) {
+			return $conditions[$conditionPtr] === T_FUNCTION;
 		});
-
-		// find the start and end of that scope
-		$scopeStart = 0;
-		$scopeEnd = null;
-		if ($conditionPtr && isset($tokens[$conditionPtr])) {
-			$conditionToken = $tokens[$conditionPtr];
-			$scopeStart = $conditionToken['scope_opener'] ?? 0;
-			$scopeEnd = $conditionToken['scope_closer'] ?? null;
-		}
-
-		// search that scope for a function with the name matching this one
-		$functionPtr = $phpcsFile->findNext([T_FUNCTION], $scopeStart + 1, $scopeEnd);
+		$this->debug("looking for definition for function {$functionName}");
+		$this->debug("my conditions are " . json_encode($conditions));
+		$this->debug("scopes to enter " . implode(',', $scopesToEnter));
+		$functionPtr = $phpcsFile->findNext([T_FUNCTION], 0);
 		while ($functionPtr) {
-			if ($functionPtr > $scopeEnd) {
-				break;
+			$functionToken = $tokens[$functionPtr];
+			$this->debug("examining function at position {$functionPtr}");
+			if ($functionToken['conditions'] !== $conditions) {
+				// TODO: this makes us skip function definitions too, even if they are in this scope
+				$this->debug("considering entering scope with conditions " . json_encode($functionToken['conditions']));
+				if (! in_array($functionPtr, $scopesToEnter)) {
+					$this->debug("skipping scope " . $phpcsFile->getDeclarationName($functionPtr));
+					// TODO: why would scope_closer be undefined for a T_FUNCTION?
+					$functionPtr = $phpcsFile->findNext([T_FUNCTION], ( $functionToken['scope_closer'] ?? $functionPtr ) + 1);
+					continue;
+				}
 			}
+			$this->debug("is this function the one we want? " . $phpcsFile->getDeclarationName($functionPtr));
 			$thisFunctionName = $phpcsFile->getDeclarationName($functionPtr);
 			if ($functionName === $thisFunctionName) {
+				// TODO: skip methods
+				$this->debug("yes indeed");
 				return true;
 			}
+			$this->debug("nope");
 			$functionPtr = $phpcsFile->findNext([T_FUNCTION], $functionPtr + 1);
 		}
 		return false;
