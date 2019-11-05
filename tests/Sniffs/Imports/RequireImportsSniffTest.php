@@ -374,4 +374,18 @@ class RequireImportsSniffTest extends TestCase {
 		$expectedLines = [];
 		$this->assertEquals($expectedLines, $lines);
 	}
+
+	public function testRequireImportsNoticesNestedFunctions() {
+		$fixtureFile = __DIR__ . '/NestedFunctionsFixture.php';
+		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
+		$helper = new SniffTestHelper();
+		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
+		$phpcsFile->process();
+		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
+		$expectedLines = [
+			9,
+			19,
+		];
+		$this->assertEquals($expectedLines, $lines);
+	}
 }
