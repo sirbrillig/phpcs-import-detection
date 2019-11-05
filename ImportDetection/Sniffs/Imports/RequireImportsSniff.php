@@ -157,7 +157,7 @@ class RequireImportsSniff implements Sniff {
 			return $this->isNamespaceImported($phpcsFile, $namespace);
 		}
 		// If the symbol has no namespace and is itself is imported or defined, ignore it
-		return $this->isNamespaceImportedOrDefined($phpcsFile, $symbol->getName());
+		return $this->isNamespaceImportedOrDefined($phpcsFile, $symbol->getName(), $symbol->getSymbolConditions());
 	}
 
 	private function isNamespaceImported(File $phpcsFile, string $namespace): bool {
@@ -168,12 +168,12 @@ class RequireImportsSniff implements Sniff {
 		);
 	}
 
-	private function isNamespaceImportedOrDefined(File $phpcsFile, string $namespace): bool {
+	private function isNamespaceImportedOrDefined(File $phpcsFile, string $namespace, array $conditions): bool {
 		return (
 			$this->isClassImported($phpcsFile, $namespace)
 			|| $this->isClassDefined($phpcsFile, $namespace)
 			|| $this->isFunctionImported($phpcsFile, $namespace)
-			|| $this->isFunctionDefined($phpcsFile, $namespace)
+			|| $this->isFunctionDefined($phpcsFile, $namespace, $conditions)
 			|| $this->isConstImported($phpcsFile, $namespace)
 			|| $this->isConstDefined($phpcsFile, $namespace)
 		);
@@ -250,12 +250,41 @@ class RequireImportsSniff implements Sniff {
 		return false;
 	}
 
-	private function isFunctionDefined(File $phpcsFile, string $functionName): bool {
+	private function isFunctionDefined(File $phpcsFile, string $functionName, array $conditions): bool {
 		$helper = new SniffHelpers();
-		$functionPtr = $phpcsFile->findNext([T_FUNCTION], 0);
+		$tokens = $phpcsFile->getTokens();
+		// find the closest surrounding function scope; ignore if but not class/trait/anon-class/interface
+		$conditionPtr = array_reduce(array_reverse(array_keys($conditions)), function ($carry, $conditionPtr) use ($conditions) {
+			if ($carry) {
+				return $carry;
+			}
+			$type = $conditions[$conditionPtr];
+			if ($type === T_CLASS || $type === T_TRAIT || $type === T_ANON_CLASS || $type === T_INTERFACE) {
+				return $carry;
+			}
+			if ($type === T_FUNCTION) {
+				return $conditionPtr;
+			}
+			return $carry;
+		});
+
+		// find the start and end of that scope
+		$scopeStart = 0;
+		$scopeEnd = null;
+		if ($conditionPtr && isset($tokens[$conditionPtr])) {
+			$conditionToken = $tokens[$conditionPtr];
+			$scopeStart = $conditionToken['scope_opener'] ?? 0;
+			$scopeEnd = $conditionToken['scope_closer'] ?? null;
+		}
+
+		// search that scope for a function with the name matching this one
+		$functionPtr = $phpcsFile->findNext([T_FUNCTION], $scopeStart + 1, $scopeEnd);
 		while ($functionPtr) {
+			if ($functionPtr > $scopeEnd) {
+				break;
+			}
 			$thisFunctionName = $phpcsFile->getDeclarationName($functionPtr);
-			if ($functionName === $thisFunctionName && ! $helper->isFunctionAMethod($phpcsFile, $functionPtr)) {
+			if ($functionName === $thisFunctionName) {
 				return true;
 			}
 			$functionPtr = $phpcsFile->findNext([T_FUNCTION], $functionPtr + 1);

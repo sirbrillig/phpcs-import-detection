@@ -219,12 +219,6 @@ class SniffHelpers {
 		return $tokens[$nextStringPtr]['content'];
 	}
 
-	public function isFunctionAMethod(File $phpcsFile, $stackPtr): bool {
-		$tokens = $phpcsFile->getTokens();
-		$currentToken = $tokens[$stackPtr];
-		return ! empty($currentToken['conditions']);
-	}
-
 	public function isSymbolADefinition(File $phpcsFile, Symbol $symbol): bool {
 		// if the previous non-whitespace token is const, function, class, or trait, it is a definition
 		// Note: this does not handle use statements, for that use isWithinImportStatement
