@@ -7,6 +7,7 @@ function doThing() {
 
 	nestedFuncA( 'here' );
 	nestedFuncB( 'hello' ); // warning: undefined
+	doAThing( 'dothingfunc' ); // warning: undefined
 }
 
 class MyThing() {
@@ -47,6 +48,8 @@ class MyThing() {
 				nestedFuncA( 'blarg' ); // warning: undefined
 			}
 		});
+
+		doANestedThing('thisfunc'); // warning: undefined
 	}
 }
 

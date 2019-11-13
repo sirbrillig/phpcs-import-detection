@@ -384,9 +384,11 @@ class RequireImportsSniffTest extends TestCase {
 		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedLines = [
 			9,
-			19,
-			47,
-			53,
+			10,
+			20,
+			48,
+			52,
+			56,
 		];
 		$this->assertEquals($expectedLines, $lines);
 	}
