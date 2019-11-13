@@ -291,12 +291,13 @@ class RequireImportsSniff implements Sniff {
 		$tokens = $phpcsFile->getTokens();
 		$functionNames = [];
 
+		$tokensToInvestigate = [T_FUNCTION, T_CLASS, T_TRAIT, T_INTERFACE];
+
 		// Skip the function we are in, but not the global scope
 		$functionToken = $tokens[$scopeStart];
 		$scopeOffset = $functionToken['type'] === 'T_FUNCTION' ? 2 : 0;
-		$functionPtr = $phpcsFile->findNext([T_FUNCTION], $scopeStart + $scopeOffset, $scopeEnd);
+		$functionPtr = $phpcsFile->findNext($tokensToInvestigate, $scopeStart + $scopeOffset, $scopeEnd);
 
-		// TODO: skip methods
 		while ($functionPtr) {
 			$functionName = $phpcsFile->getDeclarationName($functionPtr);
 			$functionToken = $tokens[$functionPtr];
@@ -308,13 +309,13 @@ class RequireImportsSniff implements Sniff {
 					$this->debug("function at {$functionPtr} has no end:" . $functionName);
 					break;
 				}
-				$functionPtr = $phpcsFile->findNext([T_FUNCTION, T_CLASS, T_TRAIT, T_INTERFACE], $thisFunctionScopeEnd, $scopeEnd);
+				$functionPtr = $phpcsFile->findNext($tokensToInvestigate, $thisFunctionScopeEnd, $scopeEnd);
 				continue;
 			}
 
 			$this->debug("found function at {$functionPtr}:" . $functionName);
 			$functionNames[] = $functionName;
-			$functionPtr = $phpcsFile->findNext([T_FUNCTION, T_CLASS, T_TRAIT, T_INTERFACE], $thisFunctionScopeEnd, $scopeEnd);
+			$functionPtr = $phpcsFile->findNext($tokensToInvestigate, $thisFunctionScopeEnd, $scopeEnd);
 		}
 		return $functionNames;
 	}
