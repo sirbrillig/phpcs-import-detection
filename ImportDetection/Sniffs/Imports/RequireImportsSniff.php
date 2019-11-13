@@ -286,7 +286,7 @@ class RequireImportsSniff implements Sniff {
 	/**
 	 * Return an array of function names defined in a scope
 	 */
-	private function findAllFunctionDefinitionsInScope(File $phpcsFile, int $scopeStart, ?int $scopeEnd): array {
+	private function findAllFunctionDefinitionsInScope(File $phpcsFile, int $scopeStart, int $scopeEnd = null): array {
 		$this->debug("looking for functions defined between {$scopeStart} and {$scopeEnd}");
 		$tokens = $phpcsFile->getTokens();
 		$functionNames = [];
