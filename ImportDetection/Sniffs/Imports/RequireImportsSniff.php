@@ -258,14 +258,15 @@ class RequireImportsSniff implements Sniff {
 		$this->debug("looking for definition for function {$functionName}");
 		$this->debug("my conditions are " . json_encode($conditions));
 		$this->debug("scopes to enter " . implode(',', $scopesToEnter));
+		if (empty($scopesToEnter)) {
+			return false;
+		}
+		// Only look at the inner-most scope and global scope
+		$scopesToEnter = [end($scopesToEnter), 0];
 
-		// Only look at the inner-most scope
-		foreach ([end($scopesToEnter)] as $scopeStart) {
-			if (!$scopeStart) {
-				continue;
-			}
+		foreach ($scopesToEnter as $scopeStart) {
 			$functionToken = $tokens[$scopeStart];
-			$scopeEnd = $functionToken['scope_closer'];
+			$scopeEnd = $functionToken['scope_closer'] ?? null;
 
 			// Within each function scope, find all the function definitions and
 			// compare their names to the name we are looking for.
@@ -277,7 +278,6 @@ class RequireImportsSniff implements Sniff {
 					$this->debug("yes indeed");
 					return true;
 				}
-				$this->debug("nope");
 			}
 		}
 		return false;
@@ -286,18 +286,35 @@ class RequireImportsSniff implements Sniff {
 	/**
 	 * Return an array of function names defined in a scope
 	 */
-	private function findAllFunctionDefinitionsInScope(File $phpcsFile, int $scopeStart, int $scopeEnd): array {
+	private function findAllFunctionDefinitionsInScope(File $phpcsFile, int $scopeStart, ?int $scopeEnd): array {
 		$this->debug("looking for functions defined between {$scopeStart} and {$scopeEnd}");
+		$tokens = $phpcsFile->getTokens();
 		$functionNames = [];
-		$functionPtr = $phpcsFile->findNext([T_FUNCTION], $scopeStart, $scopeEnd);
+
+		// Skip the function we are in, but not the global scope
+		$functionToken = $tokens[$scopeStart];
+		$scopeOffset = $functionToken['type'] === 'T_FUNCTION' ? 2 : 0;
+		$functionPtr = $phpcsFile->findNext([T_FUNCTION], $scopeStart + $scopeOffset, $scopeEnd);
+
 		// TODO: skip methods
 		while ($functionPtr) {
-			$this->debug("looking at {$functionPtr}:" . $phpcsFile->getDeclarationName($functionPtr));
-			if ($functionPtr >= $scopeEnd) {
-				break;
+			$functionName = $phpcsFile->getDeclarationName($functionPtr);
+			$functionToken = $tokens[$functionPtr];
+			$thisFunctionScopeEnd = $functionToken['scope_closer'] ?? 0;
+
+			// Skip things other than IF that have their own scope
+			if ($functionToken['type'] !== 'T_FUNCTION') {
+				if (! $thisFunctionScopeEnd) {
+					$this->debug("function at {$functionPtr} has no end:" . $functionName);
+					break;
+				}
+				$functionPtr = $phpcsFile->findNext([T_FUNCTION, T_CLASS, T_TRAIT, T_INTERFACE], $thisFunctionScopeEnd, $scopeEnd);
+				continue;
 			}
-			$functionNames[] = $phpcsFile->getDeclarationName($functionPtr);
-			$functionPtr = $phpcsFile->findNext([T_FUNCTION], $functionPtr + 1, $scopeEnd);
+
+			$this->debug("found function at {$functionPtr}:" . $functionName);
+			$functionNames[] = $functionName;
+			$functionPtr = $phpcsFile->findNext([T_FUNCTION, T_CLASS, T_TRAIT, T_INTERFACE], $thisFunctionScopeEnd, $scopeEnd);
 		}
 		return $functionNames;
 	}

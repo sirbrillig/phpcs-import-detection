@@ -5,7 +5,7 @@ function doThing() {
 		echo $arg . ' world';
 	}
 
-	nestedFuncA( 'hello' );
+	nestedFuncA( 'here' );
 	nestedFuncB( 'hello' ); // warning: undefined
 }
 
@@ -16,7 +16,7 @@ class MyThing() {
 		}
 
 		nestedFuncB( 'hello' );
-		nestedFuncA( 'hello' ); // warning: undefined
+		nestedFuncA( 'live' ); // warning: undefined
 		$this->nestedFuncA( 'hello' );
 
 		if (true) {
