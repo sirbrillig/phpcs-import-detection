@@ -20,7 +20,7 @@ class MyThing() {
 		$this->nestedFuncA( 'hello' );
 
 		if (true) {
-			nestedFuncB( 'hello' );
+			nestedFuncB( 'boo' );
 		}
 
 		if (true) {
@@ -44,7 +44,7 @@ class MyThing() {
 				}
 
 				nestedFuncC( 'hello' );
-				nestedFuncA( 'hello' ); // warning: undefined
+				nestedFuncA( 'blarg' ); // warning: undefined
 			}
 		});
 	}

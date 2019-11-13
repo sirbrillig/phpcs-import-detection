@@ -258,31 +258,48 @@ class RequireImportsSniff implements Sniff {
 		$this->debug("looking for definition for function {$functionName}");
 		$this->debug("my conditions are " . json_encode($conditions));
 		$this->debug("scopes to enter " . implode(',', $scopesToEnter));
-		$functionPtr = $phpcsFile->findNext([T_FUNCTION], 0);
-		while ($functionPtr) {
-			$functionToken = $tokens[$functionPtr];
-			$this->debug("examining function at position {$functionPtr}");
-			if ($functionToken['conditions'] !== $conditions) {
-				// TODO: this makes us skip function definitions too, even if they are in this scope
-				$this->debug("considering entering scope with conditions " . json_encode($functionToken['conditions']));
-				if (! in_array($functionPtr, $scopesToEnter)) {
-					$this->debug("skipping scope " . $phpcsFile->getDeclarationName($functionPtr));
-					// TODO: why would scope_closer be undefined for a T_FUNCTION?
-					$functionPtr = $phpcsFile->findNext([T_FUNCTION], ( $functionToken['scope_closer'] ?? $functionPtr ) + 1);
-					continue;
+
+		// Only look at the inner-most scope
+		foreach ([end($scopesToEnter)] as $scopeStart) {
+			if (!$scopeStart) {
+				continue;
+			}
+			$functionToken = $tokens[$scopeStart];
+			$scopeEnd = $functionToken['scope_closer'];
+
+			// Within each function scope, find all the function definitions and
+			// compare their names to the name we are looking for.
+			$functionDefinitionsInScope = $this->findAllFunctionDefinitionsInScope($phpcsFile, $scopeStart, $scopeEnd);
+
+			foreach ($functionDefinitionsInScope as $thisFunctionName) {
+				$this->debug("is this function the one we want? " . $thisFunctionName);
+				if ($functionName === $thisFunctionName) {
+					$this->debug("yes indeed");
+					return true;
 				}
+				$this->debug("nope");
 			}
-			$this->debug("is this function the one we want? " . $phpcsFile->getDeclarationName($functionPtr));
-			$thisFunctionName = $phpcsFile->getDeclarationName($functionPtr);
-			if ($functionName === $thisFunctionName) {
-				// TODO: skip methods
-				$this->debug("yes indeed");
-				return true;
-			}
-			$this->debug("nope");
-			$functionPtr = $phpcsFile->findNext([T_FUNCTION], $functionPtr + 1);
 		}
 		return false;
+	}
+
+	/**
+	 * Return an array of function names defined in a scope
+	 */
+	private function findAllFunctionDefinitionsInScope(File $phpcsFile, int $scopeStart, int $scopeEnd): array {
+		$this->debug("looking for functions defined between {$scopeStart} and {$scopeEnd}");
+		$functionNames = [];
+		$functionPtr = $phpcsFile->findNext([T_FUNCTION], $scopeStart, $scopeEnd);
+		// TODO: skip methods
+		while ($functionPtr) {
+			$this->debug("looking at {$functionPtr}:" . $phpcsFile->getDeclarationName($functionPtr));
+			if ($functionPtr >= $scopeEnd) {
+				break;
+			}
+			$functionNames[] = $phpcsFile->getDeclarationName($functionPtr);
+			$functionPtr = $phpcsFile->findNext([T_FUNCTION], $functionPtr + 1, $scopeEnd);
+		}
+		return $functionNames;
 	}
 
 	private function isConstDefined(File $phpcsFile, string $functionName): bool {
