@@ -66,6 +66,10 @@ class Symbol {
 		return $this->tokens[0]['tokenPosition'] ?? 1;
 	}
 
+	public function getSymbolConditions(): array {
+		return $this->tokens[0]['conditions'] ?? [];
+	}
+
 	public function markUsed() {
 		$this->isUsed = true;
 	}

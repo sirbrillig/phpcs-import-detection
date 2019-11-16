@@ -157,7 +157,7 @@ class RequireImportsSniff implements Sniff {
 			return $this->isNamespaceImported($phpcsFile, $namespace);
 		}
 		// If the symbol has no namespace and is itself is imported or defined, ignore it
-		return $this->isNamespaceImportedOrDefined($phpcsFile, $symbol->getName());
+		return $this->isNamespaceImportedOrDefined($phpcsFile, $symbol->getName(), $symbol->getSymbolConditions());
 	}
 
 	private function isNamespaceImported(File $phpcsFile, string $namespace): bool {
@@ -168,12 +168,12 @@ class RequireImportsSniff implements Sniff {
 		);
 	}
 
-	private function isNamespaceImportedOrDefined(File $phpcsFile, string $namespace): bool {
+	private function isNamespaceImportedOrDefined(File $phpcsFile, string $namespace, array $conditions): bool {
 		return (
 			$this->isClassImported($phpcsFile, $namespace)
 			|| $this->isClassDefined($phpcsFile, $namespace)
 			|| $this->isFunctionImported($phpcsFile, $namespace)
-			|| $this->isFunctionDefined($phpcsFile, $namespace)
+			|| $this->isFunctionDefined($phpcsFile, $namespace, $conditions)
 			|| $this->isConstImported($phpcsFile, $namespace)
 			|| $this->isConstDefined($phpcsFile, $namespace)
 		);
@@ -250,17 +250,74 @@ class RequireImportsSniff implements Sniff {
 		return false;
 	}
 
-	private function isFunctionDefined(File $phpcsFile, string $functionName): bool {
-		$helper = new SniffHelpers();
-		$functionPtr = $phpcsFile->findNext([T_FUNCTION], 0);
-		while ($functionPtr) {
-			$thisFunctionName = $phpcsFile->getDeclarationName($functionPtr);
-			if ($functionName === $thisFunctionName && ! $helper->isFunctionAMethod($phpcsFile, $functionPtr)) {
-				return true;
+	private function isFunctionDefined(File $phpcsFile, string $functionName, array $conditions): bool {
+		$tokens = $phpcsFile->getTokens();
+		$scopesToEnter = array_filter(array_keys($conditions), function ($conditionPtr) use ($conditions) {
+			return $conditions[$conditionPtr] === T_FUNCTION;
+		});
+		$this->debug("looking for definition for function {$functionName}");
+		$this->debug("my conditions are " . json_encode($conditions));
+		$this->debug("scopes to enter " . implode(',', $scopesToEnter));
+		if (empty($scopesToEnter)) {
+			return false;
+		}
+		// Only look at the inner-most scope and global scope
+		$scopesToEnter = [end($scopesToEnter), 0];
+
+		foreach ($scopesToEnter as $scopeStart) {
+			$functionToken = $tokens[$scopeStart];
+			$scopeEnd = $functionToken['scope_closer'] ?? null;
+
+			// Within each function scope, find all the function definitions and
+			// compare their names to the name we are looking for.
+			$functionDefinitionsInScope = $this->findAllFunctionDefinitionsInScope($phpcsFile, $scopeStart, $scopeEnd);
+
+			foreach ($functionDefinitionsInScope as $thisFunctionName) {
+				$this->debug("is this function the one we want? " . $thisFunctionName);
+				if ($functionName === $thisFunctionName) {
+					$this->debug("yes indeed");
+					return true;
+				}
 			}
-			$functionPtr = $phpcsFile->findNext([T_FUNCTION], $functionPtr + 1);
 		}
 		return false;
+	}
+
+	/**
+	 * Return an array of function names defined in a scope
+	 */
+	private function findAllFunctionDefinitionsInScope(File $phpcsFile, int $scopeStart, int $scopeEnd = null): array {
+		$this->debug("looking for functions defined between {$scopeStart} and {$scopeEnd}");
+		$tokens = $phpcsFile->getTokens();
+		$functionNames = [];
+
+		$tokensToInvestigate = [T_FUNCTION, T_CLASS, T_TRAIT, T_INTERFACE];
+
+		// Skip the function we are in, but not the global scope
+		$functionToken = $tokens[$scopeStart];
+		$scopeOffset = $functionToken['type'] === 'T_FUNCTION' ? 2 : 0;
+		$functionPtr = $phpcsFile->findNext($tokensToInvestigate, $scopeStart + $scopeOffset, $scopeEnd);
+
+		while ($functionPtr) {
+			$functionName = $phpcsFile->getDeclarationName($functionPtr);
+			$functionToken = $tokens[$functionPtr];
+			$thisFunctionScopeEnd = $functionToken['scope_closer'] ?? 0;
+
+			// Skip things other than IF that have their own scope
+			if ($functionToken['type'] !== 'T_FUNCTION') {
+				if (! $thisFunctionScopeEnd) {
+					$this->debug("function at {$functionPtr} has no end:" . $functionName);
+					break;
+				}
+				$functionPtr = $phpcsFile->findNext($tokensToInvestigate, $thisFunctionScopeEnd, $scopeEnd);
+				continue;
+			}
+
+			$this->debug("found function at {$functionPtr}:" . $functionName);
+			$functionNames[] = $functionName;
+			$functionPtr = $phpcsFile->findNext($tokensToInvestigate, $thisFunctionScopeEnd, $scopeEnd);
+		}
+		return $functionNames;
 	}
 
 	private function isConstDefined(File $phpcsFile, string $functionName): bool {
