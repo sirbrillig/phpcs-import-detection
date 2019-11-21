@@ -10,7 +10,7 @@ function doThing() {
 	doAThing( 'dothingfunc' ); // warning: undefined
 }
 
-class MyThing() {
+class MyThing {
 	public function doAThing() {
 		function nestedFuncB( $arg ) {
 			echo $arg . ' world';
