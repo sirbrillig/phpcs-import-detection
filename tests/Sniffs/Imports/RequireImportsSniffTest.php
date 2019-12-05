@@ -185,7 +185,7 @@ class RequireImportsSniffTest extends TestCase {
 		);
 		$phpcsFile->process();
 		$lines = $helper->getWarningLineNumbersFromFile($phpcsFile);
-		$expectedLines = [ 38, 61, 63 ];
+		$expectedLines = [ 38, 61, 63, 80 ];
 		$this->assertEquals($expectedLines, $lines);
 	}
 
