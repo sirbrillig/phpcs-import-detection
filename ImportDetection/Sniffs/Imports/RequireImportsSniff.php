@@ -157,7 +157,7 @@ class RequireImportsSniff implements Sniff {
 			return $this->isNamespaceImported($phpcsFile, $namespace);
 		}
 		// If the symbol has no namespace and is itself is imported or defined, ignore it
-		return $this->isNamespaceImportedOrDefined($phpcsFile, $symbol->getName(), $symbol->getSymbolConditions());
+		return $this->isNamespaceImportedOrDefined($phpcsFile, $symbol);
 	}
 
 	private function isNamespaceImported(File $phpcsFile, string $namespace): bool {
@@ -168,12 +168,23 @@ class RequireImportsSniff implements Sniff {
 		);
 	}
 
-	private function isNamespaceImportedOrDefined(File $phpcsFile, string $namespace, array $conditions): bool {
+	private function isSymbolAFunctionCall(File $phpcsFile, Symbol $symbol): bool {
+		$tokens = $phpcsFile->getTokens();
+		$stackPtr = $symbol->getSymbolPosition();
+		if (isset($tokens[$stackPtr + 1]) && $tokens[$stackPtr + 1]['type'] === 'T_OPEN_PARENTHESIS') {
+			return true;
+		}
+		return false;
+	}
+
+	private function isNamespaceImportedOrDefined(File $phpcsFile, Symbol $symbol): bool {
+		$namespace = $symbol->getName();
+		$conditions = $symbol->getSymbolConditions();
 		return (
 			$this->isClassImported($phpcsFile, $namespace)
 			|| $this->isClassDefined($phpcsFile, $namespace)
 			|| $this->isFunctionImported($phpcsFile, $namespace)
-			|| $this->isFunctionDefined($phpcsFile, $namespace, $conditions)
+			|| $this->isFunctionDefined($phpcsFile, $symbol, $namespace, $conditions)
 			|| $this->isConstImported($phpcsFile, $namespace)
 			|| $this->isConstDefined($phpcsFile, $namespace)
 		);
@@ -250,17 +261,20 @@ class RequireImportsSniff implements Sniff {
 		return false;
 	}
 
-	private function isFunctionDefined(File $phpcsFile, string $functionName, array $conditions): bool {
+	private function isFunctionDefined(File $phpcsFile, Symbol $symbol, string $functionName, array $conditions): bool {
 		$tokens = $phpcsFile->getTokens();
+
+		if (! $this->isSymbolAFunctionCall($phpcsFile, $symbol)) {
+			return false;
+		}
+
 		$scopesToEnter = array_filter(array_keys($conditions), function ($conditionPtr) use ($conditions) {
 			return $conditions[$conditionPtr] === T_FUNCTION;
 		});
 		$this->debug("looking for definition for function {$functionName}");
 		$this->debug("my conditions are " . json_encode($conditions));
 		$this->debug("scopes to enter " . implode(',', $scopesToEnter));
-		if (empty($scopesToEnter)) {
-			return false;
-		}
+
 		// Only look at the inner-most scope and global scope
 		$scopesToEnter = [end($scopesToEnter), 0];
 
