@@ -78,3 +78,4 @@ class CoolPlugin {
 
 function foo() {}
 add_action('init', foo);
+foo();
