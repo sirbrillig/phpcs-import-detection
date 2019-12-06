@@ -258,9 +258,7 @@ class RequireImportsSniff implements Sniff {
 		$this->debug("looking for definition for function {$functionName}");
 		$this->debug("my conditions are " . json_encode($conditions));
 		$this->debug("scopes to enter " . implode(',', $scopesToEnter));
-		if (empty($scopesToEnter)) {
-			return false;
-		}
+
 		// Only look at the inner-most scope and global scope
 		$scopesToEnter = [end($scopesToEnter), 0];
 
