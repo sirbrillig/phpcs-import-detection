@@ -25,6 +25,8 @@ class Car {
 }
 ```
 
+**Note:** This sniff is a lightweight syntax checker providing a scan of the current file and it doesn't know what other files might have defined. Therefore it will warn you about implicitly imported symbols even if they're in the same namespace. It's safe to import something from the same namespace and can even improve readability, but if you'd prefer to scan multiple files, I suggest using static analysis tools like [psalm](https://psalm.dev/) or [phpstan](https://github.com/phpstan/phpstan).
+
 ## Installation
 
 To use these rules in a project which is set up using [composer](https://href.li/?https://getcomposer.org/), we recommend using the [phpcodesniffer-composer-installer library](https://href.li/?https://github.com/DealerDirect/phpcodesniffer-composer-installer) which will automatically use all installed standards in the current project with the composer type `phpcodesniffer-standard` when you run phpcs.
