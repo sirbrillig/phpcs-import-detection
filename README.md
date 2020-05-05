@@ -32,8 +32,7 @@ class Car {
 To use these rules in a project which is set up using [composer](https://href.li/?https://getcomposer.org/), we recommend using the [phpcodesniffer-composer-installer library](https://href.li/?https://github.com/DealerDirect/phpcodesniffer-composer-installer) which will automatically use all installed standards in the current project with the composer type `phpcodesniffer-standard` when you run phpcs.
 
 ```
-composer require --dev squizlabs/php_codesniffer dealerdirect/phpcodesniffer-composer-installer
-composer require --dev sirbrillig/phpcs-import-detection
+composer require --dev sirbrillig/phpcs-import-detection dealerdirect/phpcodesniffer-composer-installer
 ```
 
 ## Configuration
