@@ -20,13 +20,13 @@
         "test": "./vendor/bin/phpunit"
     },
     "require" : {
-        "php" : "^7.0"
+        "php" : "^7.0",
+        "squizlabs/php_codesniffer": "^3.3.0"
     },
     "require-dev": {
         "sirbrillig/phpcs-variable-analysis": "^2.0.1",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.6",
         "phpunit/phpunit": "^6.4",
-        "limedeck/phpunit-detailed-printer": "^3.1",
-        "squizlabs/php_codesniffer": "3.3.0"
+        "limedeck/phpunit-detailed-printer": "^3.1"
     }
 }
