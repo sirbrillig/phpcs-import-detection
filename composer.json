@@ -26,7 +26,6 @@
     "require-dev": {
         "sirbrillig/phpcs-variable-analysis": "^2.0.1",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
-        "phpunit/phpunit": "^9.0",
-        "limedeck/phpunit-detailed-printer": "^3.1"
+        "phpunit/phpunit": "^9.0"
     }
 }
