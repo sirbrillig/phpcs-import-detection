@@ -5,8 +5,8 @@ jobs:
       - image: circleci/php:7.0-apache-stretch-browsers
     steps:
       - checkout
-      - run: composer install
-      - run: composer test
+      - run: COMPOSER=composer-php7.json composer install
+      - run: COMPOSER=composer-php7.json composer test
   build_php8.0:
     docker:
       - image: circleci/php:8.0
