@@ -103,3 +103,7 @@ function startMonitor() {
 }
 
 define(WHATEVER, 'some words');
+
+function engageMagic(object $foobar) {
+	echo $foobar;
+}
