@@ -14,6 +14,8 @@ use Some\NS\ {
 	function SubLevel\functionName,
 	const Constants\CONSTANT_NAME as SOME_CONSTANT,
 	function SubLevel\AnotherName,
+};
+use Some\NS\/* test comment with a backslash \ */{
 	AnotherLevel,
 };
 
