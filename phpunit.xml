@@ -2,7 +2,7 @@
 	bootstrap="tests/bootstrap.php"
 	>
 	<testsuites>
-		<testsuite>
+		<testsuite name="ImportDetection">
 			<directory>tests</directory>
 		</testsuite>
 	</testsuites>

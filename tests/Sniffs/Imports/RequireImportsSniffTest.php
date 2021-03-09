@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class RequireImportsSniffTest extends TestCase {
 	public function testRequireImportsSniff() {
-		$fixtureFile = __DIR__ . '/RequireImportsFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/RequireImportsFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -44,7 +44,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffFindsUnimportedFunctionsWithNoConfig() {
-		$fixtureFile = __DIR__ . '/RequireImportsAllowedPatternFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/RequireImportsAllowedPatternFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -69,7 +69,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffFindsUnusedImportsWithNoConfig() {
-		$fixtureFile = __DIR__ . '/RequireImportsAllowedPatternFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/RequireImportsAllowedPatternFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -94,7 +94,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffIgnoresWhitelistedUnimportedSymbols() {
-		$fixtureFile = __DIR__ . '/RequireImportsAllowedPatternFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/RequireImportsAllowedPatternFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -118,7 +118,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffIgnoresWhitelistedUnusedImports() {
-		$fixtureFile = __DIR__ . '/RequireImportsAllowedPatternFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/RequireImportsAllowedPatternFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -140,7 +140,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffFindsWordPressPatternsIfNotSet() {
-		$fixtureFile = __DIR__ . '/WordPressFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/WordPressFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -175,7 +175,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffIgnoresWordPressPatternsIfSet() {
-		$fixtureFile = __DIR__ . '/WordPressFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/WordPressFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -191,7 +191,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffDoesNotCountMethodNames() {
-		$fixtureFile = __DIR__ . '/RequireImportsMethodNameFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/RequireImportsMethodNameFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -202,7 +202,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffCountsTraitUseAsUsage() {
-		$fixtureFile = __DIR__ . '/UsedTraitFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/UsedTraitFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -213,7 +213,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffWorksWithInterfaces() {
-		$fixtureFile = __DIR__ . '/InterfaceFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/InterfaceFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -224,7 +224,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffWorksWithTraits() {
-		$fixtureFile = __DIR__ . '/TraitFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/TraitFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -235,7 +235,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffFindsGlobalSymbolsIfNoConfig() {
-		$fixtureFile = __DIR__ . '/GlobalNamespaceFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/GlobalNamespaceFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -252,7 +252,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffIgnoresGlobalSymbolsIfConfigured() {
-		$fixtureFile = __DIR__ . '/GlobalNamespaceFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/GlobalNamespaceFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -272,7 +272,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffFindsGlobalSymbolsInNamespaceIfConfigured() {
-		$fixtureFile = __DIR__ . '/RequireImportsAllowedPatternFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/RequireImportsAllowedPatternFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -293,7 +293,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsDoesNotBleedToMultipleFiles() {
-		$fixtureFile = __DIR__ . '/MultipleFilesFixtures';
+		$fixtureFile = __DIR__ . '/Fixtures/MultipleFilesFixtures';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFiles = $helper->prepareLocalFilesForSniffs($sniffFile, $fixtureFile);
@@ -305,14 +305,14 @@ class RequireImportsSniffTest extends TestCase {
 		$linesByFile = $helper->getNoticesFromFiles($phpcsFiles, 'warning');
 		$expectedLines = [
 			// The runner runs 'MultipleFilesFixtures2' first.
-			__DIR__ . '/MultipleFilesFixtures/MultipleFilesFixtures2.php' => [],
-			__DIR__ . '/MultipleFilesFixtures/MultipleFilesFixtures1.php' => [5],
+			__DIR__ . '/Fixtures/MultipleFilesFixtures/MultipleFilesFixtures2.php' => [],
+			__DIR__ . '/Fixtures/MultipleFilesFixtures/MultipleFilesFixtures1.php' => [5],
 		];
 		$this->assertEquals($expectedLines, $linesByFile);
 	}
 
 	public function testRequireImportsFindsUnimportedNamespaceIdenticalToClass() {
-		$fixtureFile = __DIR__ . '/ClassUsedAsNamespaceFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/ClassUsedAsNamespaceFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -325,7 +325,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsNoticesUnusedClasses() {
-		$fixtureFile = __DIR__ . '/ClassFixtures.php';
+		$fixtureFile = __DIR__ . '/Fixtures/ClassFixtures.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -352,7 +352,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsNoticesUnusedConstants() {
-		$fixtureFile = __DIR__ . '/ConstantsFixure.php';
+		$fixtureFile = __DIR__ . '/Fixtures/ConstantsFixure.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -366,7 +366,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsSniffTreatsFileImportAsUsedWhenUsed() {
-		$fixtureFile = __DIR__ . '/FileKeywordFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/FileKeywordFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
@@ -377,7 +377,7 @@ class RequireImportsSniffTest extends TestCase {
 	}
 
 	public function testRequireImportsNoticesNestedFunctions() {
-		$fixtureFile = __DIR__ . '/NestedFunctionsFixture.php';
+		$fixtureFile = __DIR__ . '/Fixtures/NestedFunctionsFixture.php';
 		$sniffFile = __DIR__ . '/../../../ImportDetection/Sniffs/Imports/RequireImportsSniff.php';
 		$helper = new SniffTestHelper();
 		$phpcsFile = $helper->prepareLocalFileForSniffs($sniffFile, $fixtureFile);
