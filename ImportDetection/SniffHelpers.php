@@ -93,7 +93,11 @@ class SniffHelpers {
 		}
 
 		// Get the namespace for the import first, so we can attach it to each Symbol
-		$importPrefixSymbol = $this->getFullSymbol($phpcsFile, $startBracketPtr - 1);
+		$endOfImportNamespace = $phpcsFile->findPrevious([T_NS_SEPARATOR], $startBracketPtr - 1);
+		if (! $endOfImportNamespace) {
+			throw new \Exception('Unable to parse namespace for group import statement starting at token ' . $stackPtr . ': ' . $tokens[$stackPtr]['content']);
+		}
+		$importPrefixSymbol = $this->getFullSymbol($phpcsFile, $endOfImportNamespace);
 
 		$collectedSymbols = [];
 		$lastStringPtr = $startBracketPtr;
