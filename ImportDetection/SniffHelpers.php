@@ -33,6 +33,7 @@ class SniffHelpers {
 		$allTypehints = [
 			'bool',
 			'string',
+			'object',
 			'int',
 			'float',
 			'void',
