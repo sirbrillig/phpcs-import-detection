@@ -107,3 +107,7 @@ define(WHATEVER, 'some words');
 function engageMagic(object $foobar) {
 	echo $foobar;
 }
+
+function engageMoreMagic(mixed $foobar) {
+	echo $foobar;
+}
