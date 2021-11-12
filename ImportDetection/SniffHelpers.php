@@ -165,7 +165,7 @@ class SniffHelpers {
 		if (! $endOfImportPtr) {
 			$endOfImportPtr = $endOfStatementPtr;
 		}
-		$lastStringPtr = $phpcsFile->findPrevious([T_STRING], $endOfImportPtr - 1, $stackPtr);
+		$lastStringPtr = $phpcsFile->findPrevious([T_STRING, T_NAME_QUALIFIED], $endOfImportPtr - 1, $stackPtr);
 		if (! $lastStringPtr || ! isset($tokens[$lastStringPtr])) {
 			return [];
 		}
