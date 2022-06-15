@@ -125,7 +125,7 @@ class RequireImportsSniff implements Sniff {
 
 		$wordPressPatterns = $this->getIgnoredWordPressSymbolPatterns();
 		$matchingWordPressPatterns = array_values(array_filter($wordPressPatterns, function (string $pattern) use ($symbol): bool {
-			return $this->doesSymbolMatchPattern($symbol, "/${pattern}/");
+			return $this->doesSymbolMatchPattern($symbol, "/{$pattern}/");
 		}));
 		return count($matchingWordPressPatterns) > 0;
 	}
