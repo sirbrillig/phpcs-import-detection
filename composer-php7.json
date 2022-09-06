@@ -2,6 +2,7 @@
     "name": "sirbrillig/phpcs-import-detection",
     "description": "A set of phpcs sniffs to look for unused or unimported symbols.",
     "type": "phpcodesniffer-standard",
+    "keywords" : [ "phpcs", "static analysis" ],
     "license": "MIT",
     "authors": [
         {
