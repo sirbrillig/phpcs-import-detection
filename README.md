@@ -4,6 +4,9 @@ A set of [phpcs](https://github.com/squizlabs/PHP_CodeSniffer) sniffs to look fo
 
 This adds a sniff which shows warnings if a symbol (function, constant, class) is used and is not defined directly, imported explicitly, nor has its namespace imported.
 
+> [!WARNING]
+> PHP 8 changed how `use` statements are tokenized, leading to [this bug](https://github.com/sirbrillig/phpcs-import-detection/issues/52) which basically breaks this sniff. This sniff also has fairly poor performance. I don't have time with my current work to continue to refactor this sniff at the moment and I wouldn't recommend it until at least that issue is fixed. If anyone wants to work on improvements, feel free to open a PR!
+
 When code is moved around, it can be problematic if classes which are used in a relative or global context get moved to a different namespace. In those cases it's better if the classes use their fully-qualified namespace, or if they are imported explicitly using `use` (in which case they can be detected by a linter like this one). These warnings should help when refactoring code to avoid bugs.
 
 It also detects imports which are _not_ being used.
