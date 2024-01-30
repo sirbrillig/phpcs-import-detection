@@ -165,7 +165,7 @@ class SniffHelpers {
 		if (! $endOfImportPtr) {
 			$endOfImportPtr = $endOfStatementPtr;
 		}
-		$lastStringPtr = $phpcsFile->findPrevious([T_STRING], $endOfImportPtr - 1, $stackPtr);
+		$lastStringPtr = $phpcsFile->findPrevious([T_STRING, T_NAME_QUALIFIED], $endOfImportPtr - 1, $stackPtr);
 		if (! $lastStringPtr || ! isset($tokens[$lastStringPtr])) {
 			return [];
 		}
@@ -243,9 +243,15 @@ class SniffHelpers {
 	public function getFullSymbol($phpcsFile, $stackPtr): Symbol {
 		$originalPtr = $stackPtr;
 		$tokens = $phpcsFile->getTokens();
+
+		$currentToken = Symbol::getTokenWithPosition($tokens[$stackPtr], $stackPtr);
+
+		if ($tokens[$stackPtr]['type'] === 'T_NAME_QUALIFIED') {
+			return new Symbol([$currentToken]);
+		}
+
 		// go backwards and forward and collect all the tokens until we encounter
 		// anything other than a backslash or a string
-		$currentToken = Symbol::getTokenWithPosition($tokens[$stackPtr], $stackPtr);
 		$fullSymbolParts = [];
 		while ($this->isTokenASymbolPart($currentToken)) {
 			$fullSymbolParts[] = $currentToken;

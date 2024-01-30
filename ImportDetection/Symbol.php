@@ -39,6 +39,10 @@ class Symbol {
 		if ($this->alias) {
 			return $this->alias->getName();
 		}
+		if (count($this->tokens) === 1 && $this->tokens[0]['type'] === 'T_NAME_QUALIFIED') {
+			$parts = explode('\\', $this->tokens[0]['content']);
+			return $parts[count($parts) - 1];
+		}
 
 		return $this->tokens[count($this->tokens) - 1]['content'];
 	}
