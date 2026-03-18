@@ -1,6 +1,6 @@
 # ImportDetection
 
-A set of [phpcs](https://github.com/squizlabs/PHP_CodeSniffer) sniffs to look for unused or unimported symbols.
+A set of [phpcs](https://github.com/PHPCSStandards/PHP_CodeSniffer) sniffs to look for unused or unimported symbols.
 
 This adds a sniff which shows warnings if a symbol (function, constant, class) is used and is not defined directly, imported explicitly, nor has its namespace imported.
 
@@ -40,7 +40,7 @@ composer require --dev sirbrillig/phpcs-import-detection dealerdirect/phpcodesni
 
 ## Configuration
 
-When installing sniff standards in a project, you edit a `phpcs.xml` file with the `rule` tag inside the `ruleset` tag. The `ref` attribute of that tag should specify a standard, category, sniff, or error code to enable. It’s also possible to use these tags to disable or modify certain rules. The [official annotated file](https://href.li/?https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml) explains how to do this.
+When installing sniff standards in a project, you edit a `phpcs.xml` file with the `rule` tag inside the `ruleset` tag. The `ref` attribute of that tag should specify a standard, category, sniff, or error code to enable. It’s also possible to use these tags to disable or modify certain rules. The [official annotated file](https://href.li/?https://github.com/PHPCSStandards/PHP_CodeSniffer/wiki/Annotated-Ruleset) explains how to do this.
 
 ```xml
 <?xml version="1.0"?>
